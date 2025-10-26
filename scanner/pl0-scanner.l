@@ -40,7 +40,7 @@ odd|ODD	                return t_odd;
 ")"                     return t_bra_c;
 [a-zA-Z][0-9a-zA-Z]*    return t_ident;
 [+-]?[0-9]+             return t_number;
-[ \t\n\f]                 ;
+[ \t\n\f]               ;
 .                       return t_error;
 %%
 
