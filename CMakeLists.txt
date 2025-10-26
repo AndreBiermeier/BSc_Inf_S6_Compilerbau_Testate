@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(pl0_scanner LANGUAGES C)
+project(Conpilerbau-Testate LANGUAGES C)
 
 # Use C17
 set(CMAKE_C_STANDARD 17)
