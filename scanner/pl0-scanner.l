@@ -1,5 +1,9 @@
+%x COMMENT
 
 %%
+"(*"                    BEGIN(COMMENT);
+<COMMENT>"*)"           BEGIN(INITIAL);
+<COMMENT>.|\n           ;
 "."                     return t_punkt;
 const|CONST	            return t_const;
 "="	                    return t_eq;
