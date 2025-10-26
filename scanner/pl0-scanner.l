@@ -8,7 +8,7 @@ int comment_nesting = 0;
 "(*"                    {comment_nesting = 1; BEGIN COMMENT;}
 <COMMENT>"(*"           {comment_nesting++;}
 <COMMENT>"*)"           {if (--comment_nesting == 0) BEGIN 0;}
-<COMMENT>.|\n           ;
+<COMMENT>.|\n           ;                                           /* After the "*)" rule, so it wont match the end of a comment */
 "."                     return t_punkt;
 const|CONST	            return t_const;
 "="	                    return t_eq;
