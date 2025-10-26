@@ -1,8 +1,13 @@
+%{
+int comment_nesting = 0;
+%}
+
 %x COMMENT
 
 %%
-"(*"                    BEGIN(COMMENT);
-<COMMENT>"*)"           BEGIN(INITIAL);
+"(*"                    {comment_nesting = 1; BEGIN COMMENT;}
+<COMMENT>"(*"           {comment_nesting++;}
+<COMMENT>"*)"           {if (--comment_nesting == 0) BEGIN 0;}
 <COMMENT>.|\n           ;
 "."                     return t_punkt;
 const|CONST	            return t_const;

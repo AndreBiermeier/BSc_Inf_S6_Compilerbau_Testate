@@ -31,4 +31,8 @@ abc
 123
 @
 (*foo *)
+(*(*f oo*)*)
+(* foo (*bar*)baz*)
 vfgihl
+(* level 1 (* level 2 *) back to 1 *)
+(* (* (* three levels *)*) *)
