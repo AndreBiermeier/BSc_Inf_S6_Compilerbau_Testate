@@ -1,0 +1,29 @@
+# =========================
+# Enforce LF line endings
+# =========================
+
+# Assembly
+*.asm text eol=lf
+
+# C / C++ source files
+*.c   text eol=lf
+*.h   text eol=lf
+*.cpp text eol=lf
+*.hpp text eol=lf
+
+# Lex / Flex
+*.l   text eol=lf
+
+# Shell scripts
+*.sh  text eol=lf
+
+# JSON output from assembler
+*.json text eol=lf
+
+# Git and configuration files
+*.md  text eol=lf
+*.txt text eol=lf
+
+# Prevent CLion and build directories from being normalized
+cmake-build-* binary
+.idea/ binary

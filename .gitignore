@@ -1,0 +1,37 @@
+# CLion project files
+.idea/
+cmake-build-debug/
+cmake-build-release/
+
+# Devcontainer
+.devcontainer/.cache/
+.vscode/
+
+# Build artifacts
+*.o
+*.a
+*.out
+*.so
+
+# Binary outputs
+*.bin
+*.json
+
+# Flex/Bison generated files
+lex.yy.c
+lex.yy.cpp
+y.tab.c
+y.tab.h
+*.yy.cpp
+*.yy.h
+
+# Logs and temp
+*.log
+*.tmp
+*.swp
+*.swo
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
