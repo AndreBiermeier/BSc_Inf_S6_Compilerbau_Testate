@@ -12,6 +12,7 @@ cmake-build-release/
 *.a
 *.out
 *.so
+scanner/test-cases/output
 
 # Binary outputs
 *.bin
