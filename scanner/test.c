@@ -46,33 +46,47 @@ void test(char * pl0) {
 	int token, nr = 0, n = 0;
 	char fntmp[256];
 	extern FILE * yyin;
-	
+
 	sprintf(fntmp, "%s.pl0", pl0);
-	printf("%s\n", fntmp);
+	printf("Input file: %s\n", fntmp);
 	yyin = fopen(fntmp, "r");
-	YY_FLUSH_BUFFER;
-	sprintf(fntmp, "%s.txt", pl0);
-	printf("%s\n", fntmp);
-	out = fopen(fntmp, "w");
-	while ((token = yylex()) > 0) {
-		printf("%d %s\n", token, yytext);
-		fprintf(out, "%d %s\n", token, yytext);
+	if (!yyin) {
+		printf("ERROR: Cannot open input file\n");
+		return;
 	}
-	fclose(yyin), fclose(out);
+
+	// Output to current directory instead of source directory
+	char *base = strrchr(pl0, '/');
+	if (base) base++; else base = pl0;
+
+	sprintf(fntmp, "%s.txt", base);  // Just filename, no path
+	printf("Output file: %s\n", fntmp);
+	out = fopen(fntmp, "w");
+	if (!out) {
+		printf("ERROR: Cannot open output file\n");
+		fclose(yyin);
+		return;
+	}
+
+	int token_count = 0;
+	while ((token = yylex()) > 0) {
+		token_count++;
+		if (token_count > 1) fprintf(out, "\n");
+		fprintf(out, "%d %s", token, yytext);
+	}
+
+	printf("Scan complete. Wrote %d tokens to %s\n", token_count, fntmp);
+	fclose(yyin);
+	fclose(out);
 }
 
 int main(int argc, char * argv[]) {
-	fn = argv[1];
-	printf("Argument: %s", fn);
-	int n = 0;
-	test("test1");
-	/*test("test2");
-	test("test3");
-	test("test4");
-	test("test5");
-	test("test6");
-	test("test7");
-	test("test8");*/
+	if (argc > 1) {
+		printf("Processing file: %s\n", argv[1]);
+		test(argv[1]);
+	} else {
+		printf("Using default file: test1\n");
+		test("test1");
+	}
 	return 0;
-	
 }
