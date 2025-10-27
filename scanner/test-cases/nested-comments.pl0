@@ -1,0 +1,7 @@
+(* Outer comment (* inner comment *) still in outer *)
+var a, b;
+begin
+  a := 5; (* assign a *)
+  b := a * 2; (* multiply (* nested *) here *)
+  ! b
+end.

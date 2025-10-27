@@ -1,0 +1,13 @@
+2 const
+30 missing
+3 =
+31 1
+5 ;
+6 var
+30 visible
+5 ;
+10 begin
+13 !
+30 visible
+11 end
+1 .

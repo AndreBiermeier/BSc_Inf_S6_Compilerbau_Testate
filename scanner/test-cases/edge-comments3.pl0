@@ -1,0 +1,4 @@
+(* This (* comment has )))) and **** everywhere *) *)
+const test = 100;
+(* another (* deep (* nesting *) level *) done *)
+! test

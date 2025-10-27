@@ -1,0 +1,7 @@
+(* This comment never closes... *)
+const missing = 1;
+(* but this might help *)
+var visible;
+begin
+  ! visible
+end.

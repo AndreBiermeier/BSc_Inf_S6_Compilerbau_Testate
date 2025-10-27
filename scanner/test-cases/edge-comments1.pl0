@@ -1,0 +1,7 @@
+(* level1 (* level2 with * and ) inside *) back to level1 *)
+const x = 1;
+var y;
+begin
+  y := x;
+  (* unclosed... oh wait (* *) closed! *)
+end.

@@ -1,0 +1,5 @@
+var a;
+begin
+  a := 5;  (* comment with := and ; and 123 *)
+  (* another (* nested: a := b + c *) end *)
+end.
