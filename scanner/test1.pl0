@@ -30,6 +30,7 @@ odd
 abc
 123
 @
+123abc
 (*foo *)
 (*(*f oo*)*)
 (* foo (*bar*)baz*)
