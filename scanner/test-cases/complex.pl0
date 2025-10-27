@@ -1,0 +1,11 @@
+procedure sum(a, b);
+var s;
+begin
+  s := a;
+  s := s + b;
+  ! s
+end;
+
+begin
+  call sum;
+end.

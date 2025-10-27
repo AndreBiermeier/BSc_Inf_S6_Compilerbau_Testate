@@ -1,0 +1,10 @@
+(* comment contains tokens like := and ; and numbers 123 *)
+const c = 0;
+var a;
+begin
+  (* weird spacing and newlines *)
+  a:=c;
+  a : = 1; (* spaced colon equals should be tokenized as ':' and '=' separately if your lexer is naive *)
+  a := c * 2;
+  a := c / 2;
+end.

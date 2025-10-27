@@ -1,0 +1,7 @@
+(* outer comment
+   with nested comment inside (* nested level 1 (* nested level 2 *) end *) still in outer *)
+const a = 1; (* trailing comment *)
+var x;
+begin
+  x := a + 2; (* comment with (* inner *) text *)
+end.
