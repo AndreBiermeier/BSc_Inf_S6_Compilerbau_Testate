@@ -40,8 +40,11 @@ scan: build_scanner
 	fi
 	@cd $(BUILD_DIR) && ./pl0_scanner
 	@echo "Output written to $(BUILD_DIR)/test1.txt"
+	@echo "Copying output file to project root..."
+	@cp "$(BUILD_DIR)/test1.txt" "./test1.txt"
+	@echo "Output also available in project root as test1.txt"
 
-# Clean build files (keeps CMake cache)
+# Clean build files (keeps CMake cache) and remove output from root
 .PHONY: clean
 clean:
 	@echo "Cleaning build artifacts..."
@@ -52,13 +55,17 @@ clean:
 	else \
 		echo "No build files found to clean"; \
 	fi
+	@echo "Removing output files from project root..."
+	@rm -f test1.txt
 	@echo "Clean complete"
 
-# Deep clean - remove entire build directory
+# Deep clean - remove entire build directory and root output files
 .PHONY: distclean
 distclean:
 	@echo "Deep cleaning - removing entire build directory..."
 	@rm -rf $(BUILD_DIR)
+	@echo "Removing output files from project root..."
+	@rm -f test1.txt
 	@echo "Distclean complete"
 
 # Just run CMake configuration without building
