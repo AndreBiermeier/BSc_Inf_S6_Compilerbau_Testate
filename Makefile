@@ -44,6 +44,20 @@ scan: build_scanner
 	@cp "$(BUILD_DIR)/test1.txt" "./test1.txt"
 	@echo "Output also available in project root as test1.txt"
 
+# Run scanner tests using the test script
+.PHONY: test_scanner
+test_scanner: build_scanner
+	@echo "Running scanner tests..."
+	@cd $(SCANNER_DIR) && ./run_scanner_tests.sh
+	@echo "Scanner tests completed"
+
+# Run scanner on examples using the example script
+.PHONY: test_examples
+test_examples: build_scanner
+	@echo "Running scanner on examples..."
+	@cd $(SCANNER_DIR) && ./run_scanner_on_examples.sh
+	@echo "Scanner examples completed"
+
 # Clean build files (keeps CMake cache) and remove output from root
 .PHONY: clean
 clean:
@@ -83,6 +97,8 @@ help:
 	@echo "  make build_scanner      - Build the scanner using CMake"
 	@echo "  make scan               - Run scanner on default test file"
 	@echo "  make scan file=path     - Run scanner on specific file"
+	@echo "  make test_scanner       - Run scanner test suite"
+	@echo "  make test_examples      - Run scanner on examples"
 	@echo "  make clean              - Clean build artifacts"
 	@echo "  make distclean          - Remove entire build directory"
 	@echo "  make configure          - Just run CMake configuration"
