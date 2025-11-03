@@ -1,0 +1,17 @@
+{
+  "name": "Compilerbau Testate",
+  "build": { "dockerfile": "Dockerfile" },
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "bash"
+  },
+  "extensions": [
+    "ms-vscode.cpptools",
+    "ms-vscode.makefile-tools"
+  ],
+  "remoteUser": "root",
+  "workspaceFolder": "/workspace",
+  "remoteEnv": {
+    "PATH": "/.jbdevcontainer/JetBrains/RemoteDev/dist/da63b196925f0_CLion-2025.2.3/bin/ninja/linux/x64:${containerEnv:PATH}"
+  },
+  "postCreateCommand": "echo 'export PATH=\"/.jbdevcontainer/JetBrains/RemoteDev/dist/da63b196925f0_CLion-2025.2.3/bin/ninja/linux/x64:$PATH\"' >> ~/.bashrc && which ninja && ninja --version"
+}
