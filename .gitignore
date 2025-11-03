@@ -18,6 +18,7 @@ scanner/examples/output
 # Binary outputs
 *.bin
 *.json
+!devcontainer/devcontainer.json
 
 # Flex/Bison generated files
 lex.yy.c
