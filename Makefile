@@ -103,3 +103,31 @@ help:
 	@echo "  make distclean          - Remove entire build directory"
 	@echo "  make configure          - Just run CMake configuration"
 	@echo "  make help               - Show this help"
+	
+# -----------------------
+# Parser build (with given pl-0.cpp)
+# -----------------------
+
+PARSER_DIR := parser
+PARSER_Y   := $(PARSER_DIR)/pl0.y
+PARSER_CPP := $(PARSER_DIR)/pl-0.cpp
+BUILD_PARSER := $(BUILD_DIR)/parser
+PARSER_EXEC := $(BUILD_DIR)/pl0_parser
+
+.PHONY: build_parser
+build_parser:
+	@mkdir -p $(BUILD_PARSER)
+	@echo "Running Bison..."
+	bison -d -o $(BUILD_PARSER)/y.tab.c $(PARSER_Y)
+	@echo "Running Flex..."
+	flex -o $(BUILD_PARSER)/lex.yy.c scanner/pl0-scanner.l
+	@echo "Compiling parser + scanner + main..."
+	g++ -std=c++17 -o $(PARSER_EXEC) \
+		$(BUILD_PARSER)/y.tab.c \
+		$(BUILD_PARSER)/lex.yy.c \
+		$(PARSER_CPP)
+
+.PHONY: run_parser_tests
+run_parser_tests: build_parser
+	@echo "Running parser tests..."
+	cd $(BUILD_DIR) && ./pl0_parser parser
