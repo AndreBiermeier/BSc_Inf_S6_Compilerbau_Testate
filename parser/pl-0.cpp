@@ -22,7 +22,7 @@ int main(int argc, char * argv[]) {
     FILE *out = fopen("results.txt", "a");
     int rc = 0, n = 0, ok = 0;
     string path;
-    string dir[] = {"../testat-pl0/normal/", "../testat-pl0/syntaxfehler/"};
+    string dir[] = {"tests/normal/", "tests/syntaxfehler/"};
     int soll[] = {0,1};
     for (int i = 0; i < sizeof(soll) / sizeof(soll[1]); i++) {
         string path = dir[i];
@@ -44,3 +44,4 @@ int main(int argc, char * argv[]) {
     fprintf(out, "%s %d\n", argv[1], ok);
     fclose(out);
     return 0;
+}

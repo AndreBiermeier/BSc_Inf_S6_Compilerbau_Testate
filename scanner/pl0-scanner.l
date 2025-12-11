@@ -1,4 +1,5 @@
 %{
+#include "../cmake-build-debug/parser/y.tab.h"
 int comment_nesting = 0;
 %}
 
@@ -16,7 +17,7 @@ const|CONST	            return t_const;
 ";"         	        return t_semik;
 var|VAR                 return t_var;
 procedure|PROCEDURE	    return t_proc;
-":"[ \t]*"="	        return t_assign;
+":="	                return t_assign;
 call|CALL	            return t_call;
 begin|BEGIN	            return t_begin;
 end|END	                return t_end;
@@ -29,9 +30,9 @@ do|DO                   return t_do;
 odd|ODD	                return t_odd;
 "#"                     return t_ne;
 "<"                     return t_lt;
-"<"[ \t]*"="            return t_le;
+"<="                    return t_le;
 ">"                     return t_gt;
-">"[ \t]*"="            return t_ge;
+">="                    return t_ge;
 "+"                     return t_plus;
 "-"                     return t_minus;
 "*"                     return t_mult;
@@ -39,7 +40,7 @@ odd|ODD	                return t_odd;
 "("                     return t_bra_o;
 ")"                     return t_bra_c;
 [a-zA-Z_][a-zA-Z0-9_]*  return t_ident;
-[+-]?[0-9]+             return t_number;
+[0-9]+                  return t_number;
 [ \t\n\f]               ;
 .                       return t_error;
 %%
