@@ -1,0 +1,43 @@
+program		::=		block '.'
+block		::=		constdecl vardecl proclist statement
+constdecl	::=		epsilon
+			|	'CONST' ident '=' number constlist ';'
+constlist	::=		epsilon
+			|	constlist ',' ident '=' number
+vardecl		::=		epsilon
+			|	'VAR' ident varlist ';'
+varlist		::=		epsilon
+			| 	varlist ',' ident
+proclist	::=		epsilon
+			|	proclist 'PROCEDURE' ident ';' block ';'
+statement	::=		epsilon
+			|	ident ':=' expression
+			|	'CALL' ident
+			|	'?' ident
+			|	'!' expression
+			|	'BEGIN' statement statementlist 'END'
+			|	'IF' condition 'THEN' statement
+			|	'WHILE' condition 'DO' statement
+statementlist	::=		epsilon
+			|	statementlist ';' statement
+condition	::=		'ODD' expression
+			|	expression compare expression
+compare		::=		'='
+			|	'#'
+			|	'<'
+			|	'<='
+			|	'>'
+			|	'>='
+expression	::=		term termlist
+termlist	::=		epsilon
+			|	termlist '+' term
+			|	termlist '-' term
+term		::=		factor factorlist
+factorlist	::=		epsilon
+			|	factorlist '*' factor
+			|	factorlist '/' factor
+factor		::=		ident
+			|	number
+			|	'(' expression ')'
+			|	'-' factor
+			|	'+' factor

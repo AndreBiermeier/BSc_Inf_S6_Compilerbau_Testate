@@ -1,0 +1,5 @@
+CONST a = 5;
+VAR x;
+BEGIN
+    x := a + 3 * (2 - 1)
+END.

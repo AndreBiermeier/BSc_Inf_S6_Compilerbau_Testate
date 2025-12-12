@@ -1,0 +1,5 @@
+VAR x;
+BEGIN
+    ? x;
+    ! x
+END.

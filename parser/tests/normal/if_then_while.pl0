@@ -1,0 +1,8 @@
+VAR x;
+BEGIN
+    x := 0;
+    WHILE x < 10 DO
+        IF ODD x THEN
+            ! x;
+        x := x + 1
+END.

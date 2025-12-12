@@ -1,0 +1,20 @@
+CONST max = 10;
+VAR i, sum;
+
+PROCEDURE increment;
+BEGIN
+    i := i + 1
+END;
+
+PROCEDURE add;
+BEGIN
+    sum := sum + i
+END;
+
+BEGIN
+    i := 0;
+    sum := 0;
+    WHILE i < max DO
+        CALL increment;
+        CALL add
+END.

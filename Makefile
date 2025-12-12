@@ -57,6 +57,23 @@ clean:
 	@echo "Clean complete"
 
 # -----------------------
+# Run parser on a single file
+# -----------------------
+.PHONY: parse
+parse:
+	@mkdir -p $(BUILD_DIR)
+	@echo "Building parser for single-file test..."
+	bison -d -o $(PARSER_DIR)/y.tab.c $(PARSER_DIR)/pl0.y
+	flex -o $(PARSER_DIR)/lex.yy.c $(SCANNER_DIR)/pl0-scanner.l
+	cd $(PARSER_DIR) && g++ -std=c++17 -I. -o ../$(BUILD_DIR)/my_pl0 my_pl-0.cpp
+	@if [ -n "$(file)" ]; then \
+		echo "Running parser on $(file)..."; \
+		$(BUILD_DIR)/my_pl0 $(file); \
+	else \
+		echo "Error: please provide a file with file=filename"; \
+	fi
+
+# -----------------------
 # Help
 # -----------------------
 .PHONY: help

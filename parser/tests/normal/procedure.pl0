@@ -1,0 +1,7 @@
+PROCEDURE add;
+VAR x;
+BEGIN
+    x := 1 + 2
+END;
+BEGIN
+END.
