@@ -27,6 +27,7 @@ scanner/examples/output
 **/y.tab.h
 **/*.yy.cpp
 **/*.yy.h
+**/results.txt
 
 
 # Logs and temp
