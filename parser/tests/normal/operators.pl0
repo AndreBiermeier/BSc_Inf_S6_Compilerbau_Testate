@@ -1,0 +1,4 @@
+begin
+  if odd 5 then x := x * (2 + 3) - 4 / y;
+  if x # 0 then call proc;
+end.

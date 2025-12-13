@@ -1,0 +1,6 @@
+const big = 123456;
+var _longIdentifier123, small;
+begin
+  small := 007; (* leading zeros *)
+  _longIdentifier123 := big;
+end.

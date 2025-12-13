@@ -1,0 +1,14 @@
+(* Procedure example *)
+var result;
+
+procedure square;
+var x;
+begin
+  x := 2;
+  result := x * x
+end;
+
+begin
+  call square;
+  ! result
+end.

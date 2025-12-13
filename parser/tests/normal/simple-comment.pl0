@@ -1,0 +1,8 @@
+(* Simple PL/0 program with comments *)
+const max = 100;
+var x, y;
+begin
+  x := 1;
+  y := 2;
+  (* This is an inline comment *) ! x + y
+end.
