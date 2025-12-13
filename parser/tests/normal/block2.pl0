@@ -1,0 +1,4 @@
+procedure a;
+b := 1;
+call a
+.

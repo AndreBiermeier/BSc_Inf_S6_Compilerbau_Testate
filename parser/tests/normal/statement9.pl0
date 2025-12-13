@@ -1,0 +1,4 @@
+if odd 1
+then
+    a := 1
+.

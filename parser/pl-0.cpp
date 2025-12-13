@@ -37,7 +37,7 @@ int main(int argc, char * argv[]) {
             YY_FLUSH_BUFFER;
             yacc_error = 0, rc = yyparse();
             ok += (rc == soll[i]), n++;
-            printf("%20s %d\n", dp->d_name, (rc == soll[i]));
+            printf("%40s %d\n", dp->d_name, (rc == soll[i]));
             fclose(yyin);
         }
     }

@@ -1,0 +1,75 @@
+(* const *)
+const a = 1, b = 2, c = 3;
+(* var *)
+var m, n, o, p;
+(* proc *)
+procedure f1;
+    (* empty *)
+    ;
+procedure f2;
+    a := 5
+    ;
+procedure f3;
+    const d = 1, e = 2, f = 3;
+    var q, r, s, t;
+    a := 1
+    ;
+procedure f3;
+    const d = 1, e = 2, f = 3;
+    var q, r, s, t;
+    procedure f4;
+        const g = 1;
+        var u;
+        (* empty statement *)
+        ;
+    procedure f5;
+        const h = 1;
+        var v;
+        a := 1
+        ;
+    procedure f6;
+        const h = 1;
+        var v;
+        procedure f7;
+            const i = 1;
+            var w;
+            begin
+                a := b;
+                call f1;
+                ? b;
+                ! h;
+                ! -4;
+                ! -5 - (-4);
+                ! +5 - (-4);
+                ! -5 - (-(+(+(-4)))) + 1;
+                ! 5 * 5;
+                ! -5 * 5;
+                ! -5 * (-5);
+                ! 5 / 5;
+                ! -5 / 5;
+                ! -5 / (-5);
+                ! -1 + 4 - 1 * 8 + 1 * (4/(-1)) / 5;
+                ! -1 + 4 - a * 8 + b * (4/(-1)) / 5;
+                ! -1 + (4) - 1 * (a+(-b)) + 1 * (4/(-1)) / 5;
+                begin a := 1; a := 2 end;
+                begin a := 1; a := 2; end;
+                if odd 1 then a := 1;
+                while odd 1 do a := 1;
+                if a = 1 then;
+                if b # --c then;
+                if c < 5 then;
+                while d <= 1 do;
+                while f > 2 do;
+                while f >= 2 do;
+            end
+            ;
+        a := 1
+        ;
+    a := 1
+    ;
+(* statement *)
+begin
+    call f3;
+    call f2;
+    a := 1
+end.

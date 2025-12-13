@@ -1,0 +1,10 @@
+const a = 4, b = 5, c = 6;
+var a, b, c;
+procedure a;
+b := 1;
+procedure a;
+b := 1;
+procedure a;
+b := 1;
+call a
+.

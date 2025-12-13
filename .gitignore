@@ -20,13 +20,14 @@ scanner/examples/output
 *.json
 !devcontainer/devcontainer.json
 
-# Flex/Bison generated files
-lex.yy.c
-lex.yy.cpp
-y.tab.c
-y.tab.h
-*.yy.cpp
-*.yy.h
+# Flex/Bison generated files anywhere
+**/lex.yy.c
+**/lex.yy.cpp
+**/y.tab.c
+**/y.tab.h
+**/*.yy.cpp
+**/*.yy.h
+
 
 # Logs and temp
 *.log

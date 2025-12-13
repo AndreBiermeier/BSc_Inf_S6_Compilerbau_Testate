@@ -1,0 +1,4 @@
+while odd 0
+do
+    a := 1
+.

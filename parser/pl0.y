@@ -2,49 +2,18 @@
 #include <string>
 #include <iostream>
 
-using namespace std;
-
 int yylex();
 int yyerror(string);
 extern int yacc_error;
+
+bool first_factor_of_expression = true;
 %}
 %defines "y.tab.h"
 
-/* ---------------- TOKEN DECLARATIONS ---------------- */
-%token t_punkt
-%token t_const
-%token t_eq
-%token t_komma
-%token t_semik
-%token t_var
-%token t_proc
-%token t_assign
-%token t_call
-%token t_begin
-%token t_end
-%token t_read
-%token t_write
-%token t_if
-%token t_then
-%token t_while
-%token t_do
-%token t_odd
-%token t_ne
-%token t_lt
-%token t_le
-%token t_gt
-%token t_ge
-%token t_plus
-%token t_minus
-%token t_mult
-%token t_div
-%token t_bra_o
-%token t_bra_c
-%token t_ident
-%token t_number
-%token t_error
+%token t_punkt t_const t_eq t_komma t_semik t_var t_proc t_assign t_call t_begin t_end t_read t_write t_if t_then t_while t_do t_odd t_ne t_lt t_le t_gt t_ge t_plus t_minus t_mult t_div t_bra_o t_bra_c t_ident t_number t_error
 
-/* ----------------------------------------------------- */
+%left t_plus t_minus
+%left t_mult t_div
 
 %%
 
@@ -89,7 +58,8 @@ compare         :       t_eq
                     |   t_gt
                     |   t_ge
 ;
-expression      :       term termlist
+expression      :       /* new expression */            {first_factor_of_expression = true;}
+                        term termlist
 ;
 termlist        :       /* epsilon */
                     |   termlist t_plus term
@@ -101,14 +71,13 @@ factorlist      :       /* epsilon */
                     |   factorlist t_mult factor
                     |   factorlist t_div factor
 ;
-factor          :       t_ident
-                    |   t_number
-                    |   t_bra_o expression t_bra_c
-                    |   t_minus factor
-                    |   t_plus factor
+factor          :       t_ident                         {first_factor_of_expression = false;}
+                    |   t_number                        {first_factor_of_expression = false;}
+                    |   t_bra_o expression t_bra_c      {first_factor_of_expression = false;}
+                    |   t_minus                         {if (!first_factor_of_expression) {yyerror("-- or +- not allowed. Use brackets!"); YYABORT;} first_factor_of_expression = false;}
+                        factor
+                    |   t_plus                          {if (!first_factor_of_expression) {yyerror("-+ or ++ not allowed. Use brackets!"); YYABORT;} first_factor_of_expression = false;}
+                        factor
 ;
 
-
 %%
-
-/* Nothing more needed — parsing logic is in pl-0.cpp */

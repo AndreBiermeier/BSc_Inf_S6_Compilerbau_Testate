@@ -1,5 +1,6 @@
 %{
-#include "../cmake-build-debug/parser/y.tab.h"
+#include "../parser/y.tab.h"
+
 int comment_nesting = 0;
 %}
 
