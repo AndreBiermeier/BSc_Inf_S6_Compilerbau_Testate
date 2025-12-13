@@ -73,15 +73,33 @@ clean:
 	@echo "Clean complete"
 
 # -----------------------
+# Run parser on a single file
+# -----------------------
+.PHONY: parse
+parse:
+	@mkdir -p $(BUILD_DIR)
+	@echo "Building parser for single-file test..."
+	cd $(PARSER_DIR) && bison -d -o y.tab.c pl0.y
+	flex -o $(PARSER_DIR)/lex.yy.c $(SCANNER_DIR)/pl0-scanner.l
+	cd $(PARSER_DIR) && g++ -std=c++17 -I. -o ../$(BUILD_DIR)/my_pl0 my_pl-0.cpp
+	@if [ -n "$(file)" ]; then \
+		echo "Running parser on $(file)..."; \
+		$(BUILD_DIR)/my_pl0 $(file); \
+	else \
+		echo "Error: please provide a file with file=filename"; \
+	fi
+
+# -----------------------
 # Help
 # -----------------------
 .PHONY: help
 help:
 	@echo "Available commands:"
-	@echo "  make build_scanner        - Build scanner executable"
-	@echo "  make build_parser         - Build parser + main executable"
-	@echo "  make run_parser_tests     - Run parser tests"
-	@echo "  make run_scanner_tests    - Run scanner test suite"
+	@echo "  make build_scanner      - Build scanner executable"
+	@echo "  make build_parser       - Build parser + main executable"
+	@echo "  make run_parser_tests   - Run parser tests"
+	@echo "  make run_scanner_tests  - Run scanner test suite"
 	@echo "  make run_scanner_examples - Run scanner on example files"
-	@echo "  make clean                - Remove build artifacts"
-	@echo "  make help                 - Show this help"
+	@echo "  make parse file=FILE    - Build parser and run on a single file"
+	@echo "  make clean              - Remove build artifacts"
+	@echo "  make help               - Show this help"
