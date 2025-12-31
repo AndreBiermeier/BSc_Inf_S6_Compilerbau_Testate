@@ -1,6 +1,9 @@
 %{
+#include "tree.hpp"
 #include <string>
 #include <iostream>
+using namespace std;
+typedef tree<string> syntaxTree;
 
 int yylex();
 int yyerror(string);
@@ -10,19 +13,24 @@ bool first_factor_of_expression = true;
 %}
 %defines "y.tab.h"
 
-%token t_punkt t_const t_eq t_komma t_semik t_var t_proc t_assign t_call t_begin t_end t_read t_write t_if t_then t_while t_do t_odd t_ne t_lt t_le t_gt t_ge t_plus t_minus t_mult t_div t_bra_o t_bra_c t_ident t_number t_error
+%union {syntaxTree * treel;}
+%token<tree> t_punkt t_const t_eq t_komma t_semik t_var t_proc t_assign t_call t_begin t_end t_read t_write t_if t_then t_while t_do t_odd t_ne t_lt t_le t_gt t_ge t_plus t_minus t_mult t_div t_bra_o t_bra_c t_ident t_number t_error
+%type<tree> program block constdecl constlist vardecl varlist proclist statement statementlist condition compare expression termlist term factorlist factor
+%{
+	syntaxTree * root;
+%}
 
 %left t_plus t_minus
 %left t_mult t_div
 
 %%
 
-program         :       block t_punkt
+program         :       block t_punkt						{root = $1}
 ;
-block           :       constdecl vardecl proclist statement
+block           :       constdecl vardecl proclist statement			{$$ = new syntaxTree("block")}
 ;
-constdecl       :       /* epsilon */
-                    |   t_const t_ident t_eq t_number constlist t_semik
+constdecl       :       /* epsilon */						{$$ = new syntaxTree("epsilon")}
+                    |   t_const t_ident t_eq t_number constlist t_semik		{$$ = new syntaxTree("constdecl", node($2, $4)}
 ;
 constlist       :       /* epsilon */
                     |   constlist t_komma t_ident t_eq t_number

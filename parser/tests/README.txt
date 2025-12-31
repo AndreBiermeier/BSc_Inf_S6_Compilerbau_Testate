@@ -1,0 +1,1 @@
+These tests can only be used to check the grammar with pl0_without_semantics.y as they might contain semantic errors.

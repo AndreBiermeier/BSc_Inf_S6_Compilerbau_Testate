@@ -1,0 +1,4 @@
+VAR y;
+BEGIN
+    x := 42
+END.
