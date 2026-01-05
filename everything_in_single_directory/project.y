@@ -9,8 +9,8 @@ int yylex();
 void yyerror(const std::string &s);
 
 syntaxTree * root;
+
 %}
-%defines "y.tab.h"
 
 %union {tree<string> * tree_node;}
 
@@ -28,7 +28,7 @@ syntaxTree * root;
 
 %%
 
-program         :       block t_punkt						                {$$ = new syntaxTree("program"); $$->append($1); root = $$;}
+program         :       block t_punkt						                {$$ = new syntaxTree("program"); $$->append($1); root = $$; root->ascii();}
 ;
 block           :       constdecl vardecl proclist statement			    {$$ = new syntaxTree("block"); $$->append($1); $$->append($2); $$->append($3); $$->append($4);}
 ;

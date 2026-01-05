@@ -1,5 +1,7 @@
 #include <stdio.h>
-#include "../parser/y.tab.h"
+#include "pl0tokens.h"
+#include "../tree/tree.hpp"
+
 
 extern int yylex();
 extern char *yytext;

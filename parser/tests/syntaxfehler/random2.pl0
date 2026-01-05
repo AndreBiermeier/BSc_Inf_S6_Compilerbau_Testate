@@ -56,7 +56,7 @@ procedure f3;
                 if odd 1 then a := 1;
                 while odd 1 do a := 1;
                 if a = 1 then;
-                if b # --c then;
+                if b # --c! then;
                 if c < 5 then;
                 while d <= 1 do;
                 while f > 2 do;

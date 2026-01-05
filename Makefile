@@ -2,126 +2,168 @@
 # Directories
 # -----------------------
 BUILD_DIR := cmake-build-debug
-SCANNER_DIR := scanner
 PARSER_DIR := parser
+SCANNER_DIR := scanner
 SEMANTIC_DIR := semantic
 TREE_DIR := tree
 
+# -----------------------
+# Compiler / Tools
+# -----------------------
+CXX := g++
+LEX := flex
+YACC := bison
+CXXFLAGS := -std=c++17 -Wall -O2 -I$(PARSER_DIR) -I$(SCANNER_DIR) -I$(SEMANTIC_DIR) -I$(TREE_DIR)
+
+# -----------------------
+# Files
+# -----------------------
+MAIN_CPP ?= $(PARSER_DIR)/my_pl-0.cpp
+TEST_MAIN_CPP := $(PARSER_DIR)/pl-0.cpp
+YACC_SRC := $(PARSER_DIR)/pl0.y
+LEX_SRC := $(SCANNER_DIR)/pl0-scanner.l
+
+YACC_C := $(BUILD_DIR)/pl0.tab.c
+YACC_H := $(BUILD_DIR)/pl0.tab.h
+LEX_C := $(BUILD_DIR)/pl0.yy.c
+
+PARSER_OBJ := $(BUILD_DIR)/main.o $(BUILD_DIR)/pl0.tab.o $(BUILD_DIR)/pl0.yy.o
 PARSER_EXEC := $(BUILD_DIR)/pl0_parser
+
+# Parser for test main (wo semantic checks)
+TEST_PARSER_OBJ := $(BUILD_DIR)/main_test.o $(BUILD_DIR)/pl0.tab.o $(BUILD_DIR)/pl0.yy.o
+TEST_PARSER_EXEC := $(BUILD_DIR)/pl0_test_parser
+
+# Scanner
+SCANNER_OBJ := $(BUILD_DIR)/scanner.o
 SCANNER_EXEC := $(BUILD_DIR)/pl0_scanner
 
 # -----------------------
-# Build scanner
+# Create build directory
 # -----------------------
-.PHONY: build_scanner
-build_scanner:
-	@mkdir -p $(BUILD_DIR)
-	@echo "Running Flex for scanner..."
-	flex -o $(SCANNER_DIR)/lex.yy.c $(SCANNER_DIR)/pl0-scanner.l
-	@echo "Compiling scanner..."
-	g++ -std=c++17 -I$(SCANNER_DIR) -I$(PARSER_DIR) \
-	    -o $(SCANNER_EXEC) \
-	    $(SCANNER_DIR)/test.c $(SCANNER_DIR)/lex.yy.c
-	@echo "Scanner built successfully: $(SCANNER_EXEC)"
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
 
 # -----------------------
-# Build parser + semantic analysis
+# Compile main parser file
 # -----------------------
-.PHONY: build_parser
-build_parser:
-	@mkdir -p $(BUILD_DIR)
-	@echo "Generating parser headers (Bison)..."
-	cd $(PARSER_DIR) && bison -d -o y.tab.c pl0.y
-	@echo "y.tab.h ready in parser directory"
-	@echo "Running Flex for parser..."
-	flex -o $(PARSER_DIR)/lex.yy.c $(SCANNER_DIR)/pl0-scanner.l
-	@echo "Compiling parser + semantic analysis..."
-	cd $(PARSER_DIR) && g++ -std=c++17 -DPARSER_BUILD \
-	    -I. -I../$(SCANNER_DIR) -I../$(SEMANTIC_DIR) -I../$(TREE_DIR) \
-	    -o ../$(PARSER_EXEC) pl-0.cpp ../$(SEMANTIC_DIR)/symbol_table.cpp
-	@echo "Parser built successfully: $(PARSER_EXEC)"
+$(BUILD_DIR)/main.o: $(MAIN_CPP) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -c $(MAIN_CPP) -o $(BUILD_DIR)/main.o
+
+# Compile test main parser file (pl-0.cpp)
+$(BUILD_DIR)/main_test.o: $(TEST_MAIN_CPP) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -c $(TEST_MAIN_CPP) -o $(BUILD_DIR)/main_test.o
 
 # -----------------------
-# Run parser tests
+# Generate and compile Bison parser
 # -----------------------
-.PHONY: run_parser_tests
-run_parser_tests: build_parser
-	@echo "Running parser tests..."
-	cd $(PARSER_DIR) && ../$(PARSER_EXEC) tests
+$(YACC_C) $(YACC_H): $(YACC_SRC) | $(BUILD_DIR)
+	cd $(PARSER_DIR) && $(YACC) -d -o ../$(YACC_C) pl0.y
+
+$(BUILD_DIR)/pl0.tab.o: $(YACC_C) $(YACC_H) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -c $(YACC_C) -o $(BUILD_DIR)/pl0.tab.o
 
 # -----------------------
-# Run semantic tests
+# Generate and compile Flex scanner
 # -----------------------
-.PHONY: run_semantic_tests
-run_semantic_tests: build_parser
-	@echo "Running semantic analysis tests..."
-	cd $(SEMANTIC_DIR) && ../$(PARSER_EXEC) tests
+$(LEX_C): $(LEX_SRC) $(YACC_H) | $(BUILD_DIR)
+	$(LEX) -o $(LEX_C) $(LEX_SRC)
+
+$(BUILD_DIR)/pl0.yy.o: $(LEX_C) $(YACC_H) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -c $(LEX_C) -o $(BUILD_DIR)/pl0.yy.o
 
 # -----------------------
-# Run scanner tests
+# Build scanner executable
 # -----------------------
-.PHONY: run_scanner_tests
-run_scanner_tests: build_scanner
-	@echo "Running scanner tests..."
-	cd $(SCANNER_DIR) && ./run_scanner_tests.sh
+$(SCANNER_OBJ): $(SCANNER_DIR)/test.cpp | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -c $(SCANNER_DIR)/test.cpp -o $(SCANNER_OBJ)
+
+$(SCANNER_EXEC): $(SCANNER_OBJ) $(BUILD_DIR)/pl0.yy.o | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) $(SCANNER_OBJ) $(BUILD_DIR)/pl0.yy.o -o $(SCANNER_EXEC)
 
 # -----------------------
-# Run scanner on examples
+# Link parser executable
 # -----------------------
-.PHONY: run_scanner_examples
-run_scanner_examples: build_scanner
-	@echo "Running scanner on example files..."
-	cd $(SCANNER_DIR) && ./run_scanner_on_examples.sh
-	@echo "Scanner examples completed"
+$(PARSER_EXEC): $(PARSER_OBJ) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) $(PARSER_OBJ) -o $(PARSER_EXEC)
+
+# Link test parser executable
+$(TEST_PARSER_EXEC): $(TEST_PARSER_OBJ) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) $(TEST_PARSER_OBJ) -o $(TEST_PARSER_EXEC)
 
 # -----------------------
-# Run parser on a single file (syntax only)
+# Phony targets
 # -----------------------
-.PHONY: parse
-parse: build_parser
+.PHONY: build build_parser build_scanner run run_scanner_tests run_scanner_examples run_parser_wo_semantic_tests clean help
+
+# -----------------------
+# Build everything
+# -----------------------
+build: $(PARSER_EXEC) $(SCANNER_EXEC)
+	@echo "Build complete!"
+	@echo "Run parser with: 'make run file=FILE'"
+	@echo "Run scanner tests with: 'make run_scanner_tests'"
+	@echo "Run scanner examples with: 'make run_scanner_examples'"
+
+build_parser: $(PARSER_EXEC)
+	@echo "Parser built: $(PARSER_EXEC)"
+
+build_scanner: $(SCANNER_EXEC)
+	@echo "Scanner built: $(SCANNER_EXEC)"
+
+# -----------------------
+# Run parser on a file
+# -----------------------
+run: $(PARSER_EXEC)
 	@if [ -n "$(file)" ]; then \
-		echo "Running parser on $(file)..."; \
 		./$(PARSER_EXEC) $(file); \
 	else \
-		echo "Error: please provide a file with file=filename"; \
+		echo "Error: please provide a file with 'file=filename'"; \
 	fi
 
 # -----------------------
-# Run semantic analysis on a single file
+# Run parser without semantic checks (pl-0.cpp tests)
 # -----------------------
-.PHONY: semantic
-semantic: build_parser
-	@if [ -n "$(file)" ]; then \
-		echo "Running semantic analysis on $(file)..."; \
-		./$(PARSER_EXEC) $(file); \
-	else \
-		echo "Error: please provide a file with file=filename"; \
-	fi
+run_parser_wo_semantic_tests: clean $(TEST_PARSER_EXEC)
+	@echo "Running parser without semantic checks using parser tests..."
+	@./$(TEST_PARSER_EXEC)
 
 # -----------------------
-# Clean
+# Run scanner test suite
 # -----------------------
-.PHONY: clean
+run_scanner_tests: $(SCANNER_EXEC)
+	@echo "Running PL/0 scanner test suite..."
+	@cd $(SCANNER_DIR) && ./run_scanner_tests.sh
+
+# -----------------------
+# Run scanner examples
+# -----------------------
+run_scanner_examples: $(SCANNER_EXEC)
+	@echo "Running PL/0 scanner on all examples..."
+	@cd $(SCANNER_DIR) && ./run_scanner_examples.sh
+
+# -----------------------
+# Clean build artifacts
+# -----------------------
 clean:
 	@echo "Cleaning build artifacts..."
-	@rm -rf $(BUILD_DIR)/pl0_parser $(BUILD_DIR)/pl0_scanner
-	@rm -f $(PARSER_DIR)/y.tab.c $(PARSER_DIR)/y.tab.h $(PARSER_DIR)/lex.yy.c
-	@rm -f $(SCANNER_DIR)/lex.yy.c
-	@echo "Clean complete"
+	@rm -rf $(BUILD_DIR)/*
+	@echo "Clean complete."
 
 # -----------------------
 # Help
 # -----------------------
-.PHONY: help
 help:
 	@echo "Available commands:"
-	@echo "  make build_scanner        - Build scanner executable"
-	@echo "  make build_parser         - Build parser + semantic executable"
-	@echo "  make run_parser_tests     - Run parser (syntax) tests"
-	@echo "  make run_semantic_tests   - Run semantic analysis tests"
-	@echo "  make run_scanner_tests    - Run scanner test suite"
-	@echo "  make run_scanner_examples - Run scanner on example files"
-	@echo "  make parse file=FILE      - Run syntax parser on a single file"
-	@echo "  make semantic file=FILE   - Run semantic analysis on a single file"
-	@echo "  make clean                - Remove build artifacts"
-	@echo "  make help                 - Show this help"
+	@echo "  make build                 - Build parser + scanner"
+	@echo "  make build_parser          - Build parser only"
+	@echo "  make build_scanner         - Build scanner only"
+	@echo "  make run file=FILE         - Run parser on FILE"
+	@echo "  make run_parser_wo_semantic_tests - Run parser tests without semantic checks"
+	@echo "  make run_scanner_tests     - Run scanner test suite"
+	@echo "  make run_scanner_examples  - Run scanner on all examples and count errors"
+	@echo "  make clean                 - Remove all build artifacts"
+	@echo "  make help                  - Show this help"
+	@echo ""
+	@echo "To use a different main file for testing, call:"
+	@echo "  make MAIN_CPP=parser/my_pl-0.cpp build run file=FILE"

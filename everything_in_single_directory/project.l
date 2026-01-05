@@ -1,6 +1,6 @@
 %{
 #include "../tree/tree.hpp"
-#include "../parser/y.tab.h"
+#include "project.tab.h"
 #include <string>
 
 int comment_nesting = 0;

@@ -20,7 +20,8 @@ add_custom_target(generate_scanner ALL
 )
 
 # Add executable (ONLY test.c - since it includes lex.yy.c)
-add_executable(pl0_scanner "scanner/test.c")
+add_executable(pl0_scanner "scanner/test.c"
+        everything_in_single_directory/project.c)
 
 # Add include path so that test.c can include "lex.yy.c"
 target_include_directories(pl0_scanner PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
