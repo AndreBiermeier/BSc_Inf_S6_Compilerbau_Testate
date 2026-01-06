@@ -2,14 +2,36 @@
 #include "../tree/tree.hpp"
 #include <string>
 #include <iostream>
+#include "../symboltable/symboltabelle.hpp"
 using namespace std;
 typedef tree<string> syntaxTree;
+typedef symtab<int> pl0_symtab;
 
 int yylex();
 void yyerror(const std::string &s);
 
 syntaxTree * root;
+pl0_symtab st (1);
+
+void insert_sym(string s, int type){
+    if (st.insert(s, type))
+        yyerror(string("duplicate sym ") + s);
+}
+void check_sym(string s, int type){
+    int typ = 0;
+    int delta = 0;
+    if (st.lookup(s, typ, delta))
+        yyerror("undeclared sym " + s);
+    else if (!(typ & type))
+        yyerror("wrong sum-type " + s);
+    cout << "check sym " << type << " " << type << endl;
+}
+enum{st_const = 1 << 0, st_var = 1 << 1, st_proc = 1 << 2};
+
+typedef symtab<int> pl0_symtab;
 %}
+
+
 %defines "y.tab.h"
 
 %union {
@@ -35,22 +57,22 @@ syntaxTree * root;
 
 program         :       block t_punkt						                {$$ = new syntaxTree("program"); $$->append($1); root = $$; root->ascii();}
 ;
-block           :       constdecl vardecl proclist statement			    {$$ = new syntaxTree("block"); $$->append($1); $$->append($2); $$->append($3); $$->append($4);}
+block           :       {st.level_up();} constdecl vardecl proclist statement			    {$$ = new syntaxTree("block"); $$->append($2); $$->append($3); $$->append($4); $$->append($5);st.level_down();}
 ;
 constdecl       :       /* epsilon */						                {$$ = nullptr;}
-                    |   t_const t_ident t_eq t_number constlist t_semik		{$$ = new syntaxTree("constdecl"); auto first = new syntaxTree("const"); first->append(new syntaxTree($2)); first->append(new syntaxTree($4)); $$->append(first); if ($5) $$->append($5);}
+                    |   t_const t_ident t_eq t_number constlist t_semik		{$$ = new syntaxTree("constdecl"); auto first = new syntaxTree("const"); first->append(new syntaxTree($2)); first->append(new syntaxTree($4)); insert_sym($2, st_const); $$->append(first); if ($5) $$->append($5);}
 ;
 constlist       :       /* epsilon */                                       {$$ = nullptr;}
-                    |   constlist t_komma t_ident t_eq t_number             {auto c = new syntaxTree("const"); c->append(new syntaxTree($3)); c->append(new syntaxTree($5)); if ($1) {$1->append(c); $$ = $1;} else {$$ = new syntaxTree("constlist"); $$->append(c);}}
+                    |   constlist t_komma t_ident t_eq t_number             {auto c = new syntaxTree("const"); c->append(new syntaxTree($3)); c->append(new syntaxTree($5)); insert_sym($3, st_const); if ($1) {$1->append(c); $$ = $1;} else {$$ = new syntaxTree("constlist"); $$->append(c);}}
 ;
 vardecl         :       /* epsilon */                                       {$$ = nullptr;}
-                    |   t_var t_ident varlist t_semik                       {$$ = new syntaxTree("vardecl"); auto first = new syntaxTree("var"); first->append(new syntaxTree($2)); $$->append(first); if ($3) $$->append($3);}
+                    |   t_var t_ident varlist t_semik                       {$$ = new syntaxTree("vardecl"); auto first = new syntaxTree("var"); first->append(new syntaxTree($2)); insert_sym($2, st_var); $$->append(first); if ($3) $$->append($3);}
 ;
 varlist         :       /* epsilon */                                       {$$ = nullptr;}
-                    |   varlist t_komma t_ident                             {auto v = new syntaxTree("var"); v->append(new syntaxTree($3)); if ($1) {$1->append(v); $$ = $1;} else {$$ = new syntaxTree("varlist"); $$->append(v);}}
+                    |   varlist t_komma t_ident                             {auto v = new syntaxTree("var"); v->append(new syntaxTree($3)); insert_sym($3, st_var); if ($1) {$1->append(v); $$ = $1;} else {$$ = new syntaxTree("varlist"); $$->append(v);}}
 ;
 proclist        :       /* epsilon */                                       {$$ = nullptr;}
-                    |   proclist t_proc t_ident t_semik block t_semik       {auto p = new syntaxTree("proc"); p->append(new syntaxTree("ident")); p->append(new syntaxTree("block")); if ($1) {$1->append(p); $$ = $1;} else {$$ = new syntaxTree("proclist"); $$->append(p);}}
+                    |   proclist t_proc t_ident t_semik block t_semik       {auto p = new syntaxTree("proc"); p->append(new syntaxTree("ident")); p->append(new syntaxTree("block")); insert_sym($3, st_proc); if ($1) {$1->append(p); $$ = $1;} else {$$ = new syntaxTree("proclist"); $$->append(p);}}
 ;
 statement       :       /* epsilon */                                       {$$ = nullptr;}
                     |   t_ident t_assign expression                         {$$ = new syntaxTree("statement"); auto a = new syntaxTree("assign"); a->append(new syntaxTree("ident")); a->append($3); $$->append(a);}
