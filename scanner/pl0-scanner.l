@@ -2,6 +2,8 @@
 #include "../tree/tree.hpp"
 #include "../parser/y.tab.h"
 #include <string>
+#include <cstdlib>
+#include <cstring>
 
 int comment_nesting = 0;
 %}
@@ -42,8 +44,8 @@ odd|ODD	                return t_odd;
 "/"                     return t_div;
 "("                     return t_bra_o;
 ")"                     return t_bra_c;
-[a-zA-Z_][a-zA-Z0-9_]*  return t_ident;
-[0-9]+                  return t_number;
+[a-zA-Z_][a-zA-Z0-9_]*  {yylval.txt = strdup(yytext); return t_ident;};
+[0-9]+                  {yylval.txt = strdup(yytext); return t_number;};
 [ \t\n\f]               ;
 .                       return t_error;
 %%
