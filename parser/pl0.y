@@ -28,26 +28,26 @@ syntaxTree * root;
 
 %%
 
-program         :       block t_punkt						                {$$ = new syntaxTree("program"); $$->append($1); root = $$;}
+program         :       block t_punkt						                {$$ = new syntaxTree("program"); $$->append($1); root = $$; root->ascii();}
 ;
 block           :       constdecl vardecl proclist statement			    {$$ = new syntaxTree("block"); $$->append($1); $$->append($2); $$->append($3); $$->append($4);}
 ;
-constdecl       :       /* epsilon */						                {$$ = new syntaxTree("constdecl");}
+constdecl       :       /* epsilon */						                {$$ = nullptr;}
                     |   t_const t_ident t_eq t_number constlist t_semik		{$$ = new syntaxTree("constdecl"); auto first = new syntaxTree("const"); first->append(new syntaxTree("ident")); first->append(new syntaxTree("number")); $$->append(first); if ($5) $$->append($5);}
 ;
-constlist       :       /* epsilon */                                       {$$ = new syntaxTree("const");}
+constlist       :       /* epsilon */                                       {$$ = nullptr;}
                     |   constlist t_komma t_ident t_eq t_number             {auto c = new syntaxTree("const"); c->append(new syntaxTree("ident")); c->append(new syntaxTree("number")); if ($1) {$1->append(c); $$ = $1;} else {$$ = new syntaxTree("constlist"); $$->append(c);}}
 ;
-vardecl         :       /* epsilon */                                       {$$ = new syntaxTree("vardecl");}
+vardecl         :       /* epsilon */                                       {$$ = nullptr;}
                     |   t_var t_ident varlist t_semik                       {$$ = new syntaxTree("vardecl"); auto first = new syntaxTree("var"); first->append(new syntaxTree("ident")); $$->append(first); if ($3) $$->append($3);}
 ;
-varlist         :       /* epsilon */                                       {$$ = new syntaxTree("var");}
+varlist         :       /* epsilon */                                       {$$ = nullptr;}
                     |   varlist t_komma t_ident                             {auto v = new syntaxTree("var"); v->append(new syntaxTree("ident")); if ($1) {$1->append(v); $$ = $1;} else {$$ = new syntaxTree("varlist"); $$->append(v);}}
 ;
-proclist        :       /* epsilon */                                       {$$ = new syntaxTree("proc");}
+proclist        :       /* epsilon */                                       {$$ = nullptr;}
                     |   proclist t_proc t_ident t_semik block t_semik       {auto p = new syntaxTree("proc"); p->append(new syntaxTree("ident")); p->append(new syntaxTree("block")); if ($1) {$1->append(p); $$ = $1;} else {$$ = new syntaxTree("proclist"); $$->append(p);}}
 ;
-statement       :       /* epsilon */                                       {$$ = new syntaxTree("statement");}
+statement       :       /* epsilon */                                       {$$ = nullptr;}
                     |   t_ident t_assign expression                         {$$ = new syntaxTree("statement"); auto a = new syntaxTree("assign"); a->append(new syntaxTree("ident")); a->append($3); $$->append(a);}
                     |   t_call t_ident                                      {$$ = new syntaxTree("statement"); auto c = new syntaxTree("call"); c->append(new syntaxTree("ident")); $$->append(c);}
                     |   t_read t_ident                                      {$$ = new syntaxTree("statement"); auto r = new syntaxTree("read"); r->append(new syntaxTree("ident")); $$->append(r);}
@@ -56,7 +56,7 @@ statement       :       /* epsilon */                                       {$$ 
                     |   t_if condition t_then statement                     {$$ = new syntaxTree("statement"); auto i = new syntaxTree("if"); i->append($2); i->append($4); $$->append(i);}
                     |   t_while condition t_do statement                    {$$ = new syntaxTree("statement"); auto l = new syntaxTree("while"); l->append($2); l->append($4); $$->append(l);}
 ;
-statementlist   :       /* epsilon */                                       {$$ = new syntaxTree("statementlist");}
+statementlist   :       /* epsilon */                                       {$$ = nullptr;}
                     |   statementlist t_semik statement                     {auto s = new syntaxTree("statement"); s->append($3); if ($1) {$1->append(s); $$ = $1;} else {$$ = new syntaxTree("statementlist"); $$->append(s);}}
 ;
 condition       :       t_odd expression                                    {$$ = new syntaxTree("condition"); auto c = new syntaxTree("odd"); c->append($2); $$->append(c);}
@@ -71,13 +71,13 @@ compare         :       t_eq                                                {$$ 
 ;
 expression      :       term termlist                                       {$$ = new syntaxTree("expression"); $$->append($1); if ($2) $$->append($2);}
 ;
-termlist        :       /* epsilon */                                       {$$ = new syntaxTree("termlist");}
+termlist        :       /* epsilon */                                       {$$ = nullptr;}
                     |   termlist t_plus term                                {auto pt = new syntaxTree("+"); pt->append($3); if ($1) {$1->append(pt); $$ = $1;} else {$$ = new syntaxTree("termlist"); $$->append(pt);}}
                     |   termlist t_minus term                               {auto mt = new syntaxTree("-"); mt->append($3); if ($1) {$1->append(mt); $$ = $1;} else {$$ = new syntaxTree("termlist"); $$->append(mt);}}
 ;
 term            :       factor factorlist                                   {$$ = new syntaxTree("term"); $$->append($1); if ($2) $$->append($2);}
 ;
-factorlist      :       /* epsilon */                                       {$$ = new syntaxTree("factorlist");}
+factorlist      :       /* epsilon */                                       {$$ = nullptr;}
                     |   factorlist t_mult factor                            {auto mf = new syntaxTree("*"); mf->append($3); if ($1) {$1->append(mf); $$ = $1;} else {$$ = new syntaxTree("factorlist"); $$->append(mf);}}
                     |   factorlist t_div factor                             {auto df = new syntaxTree("/"); df->append($3); if ($1) {$1->append(df); $$ = $1;} else {$$ = new syntaxTree("factorlist"); $$->append(df);}}
 ;
