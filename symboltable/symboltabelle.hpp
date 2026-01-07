@@ -46,8 +46,9 @@ template <class ENTRY> void symtab<ENTRY>::level_down() {
 
 template <class ENTRY> int symtab<ENTRY>::insert(const string & name, const ENTRY & e){
 	int r = -1;
-	if (content[content.size()-1].find(name) == content[content.size()-1].end())
+	if (content[content.size()-1].find(name) == content[content.size()-1].end()) {
 		content[content.size()-1][name] = e; r = 0;
+	}
 	if (debug)
 		cerr << "Symtab-insert " << name << ": " << e << " Return Value: " << r << endl;
 	return r;
