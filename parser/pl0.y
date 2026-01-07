@@ -5,9 +5,9 @@
 #include "../symboltable/symboltabelle.hpp"
 #include <string>
 #include <iostream>
+
 typedef tree<string> syntaxTree;
 typedef symtab<int> pl0_symtab;
-
 using namespace std;
 
 
