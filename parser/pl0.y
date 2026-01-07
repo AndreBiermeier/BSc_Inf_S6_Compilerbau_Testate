@@ -23,7 +23,7 @@ bool semantic_error = false;
 // Helper functions
 void insert_sym(string s, int type){
     if (st.insert(s, type)){
-        yyerror(string("invalid reassignment of symbol " + s));
+        yyerror(string("invalid redeclaration of symbol " + s));
         semantic_error = true;
     }
     st.print();
