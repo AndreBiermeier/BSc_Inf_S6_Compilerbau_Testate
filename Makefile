@@ -43,6 +43,10 @@ TEST_PARSER_EXEC := $(BUILD_DIR)/pl0_test_parser
 SCANNER_OBJ := $(BUILD_DIR)/scanner.o
 SCANNER_EXEC := $(BUILD_DIR)/pl0_scanner
 
+SEMANTIC_TEST_MAIN := $(PARSER_DIR)/pl-0.cpp
+SEMANTIC_TEST_OBJ  := $(BUILD_DIR)/main_sem.o $(BUILD_DIR)/pl0.tab.o $(BUILD_DIR)/pl0.yy.o
+SEMANTIC_TEST_EXEC := $(BUILD_DIR)/pl0_semantic_test
+
 # -----------------------
 # Create build directory
 # -----------------------
@@ -58,6 +62,10 @@ $(BUILD_DIR)/main.o: $(MAIN_CPP) | $(BUILD_DIR)
 # Compile test main parser file (pl-0.cpp)
 $(BUILD_DIR)/main_test.o: $(TEST_MAIN_CPP) | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $(TEST_MAIN_CPP) -o $(BUILD_DIR)/main_test.o
+
+# Compile semantic test main
+$(BUILD_DIR)/main_sem.o: $(SEMANTIC_TEST_MAIN) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -c $(SEMANTIC_TEST_MAIN) -o $(BUILD_DIR)/main_sem.o
 
 # -----------------------
 # Generate and compile Bison parser
@@ -99,14 +107,18 @@ $(SCANNER_EXEC): $(SCANNER_OBJ) $(BUILD_DIR)/pl0.yy.o | $(BUILD_DIR)
 $(PARSER_EXEC): $(PARSER_OBJ) | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $(PARSER_OBJ) -o $(PARSER_EXEC)
 
-# Link test parser executable
+# Link test parser executable (wo semantic checks)
 $(TEST_PARSER_EXEC): $(TEST_PARSER_OBJ) | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $(TEST_PARSER_OBJ) -o $(TEST_PARSER_EXEC)
+
+# Link semantic test executable
+$(SEMANTIC_TEST_EXEC): $(SEMANTIC_TEST_OBJ) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) $(SEMANTIC_TEST_OBJ) -o $(SEMANTIC_TEST_EXEC)
 
 # -----------------------
 # Phony targets
 # -----------------------
-.PHONY: build build_parser build_scanner run run_scanner_tests run_scanner_examples run_parser_wo_semantic_tests clean help
+.PHONY: build build_parser build_scanner run run_scanner_tests run_scanner_examples run_parser_wo_semantic_tests run_parser_tests clean help
 
 # -----------------------
 # Build everything
@@ -134,11 +146,18 @@ run: $(PARSER_EXEC)
 	fi
 
 # -----------------------
-# Run parser without semantic checks (pl0_without_semantics.y)
+# Run parser without semantic checks
 # -----------------------
 run_parser_wo_semantic_tests: clean $(TEST_PARSER_EXEC)
 	@echo "Running parser without semantic checks using parser tests..."
-	@./$(TEST_PARSER_EXEC)
+	@./$(TEST_PARSER_EXEC) parser/tests/normal parser/tests/syntaxfehler
+
+# -----------------------
+# Run parser with semantic checks
+# -----------------------
+run_parser_tests: clean $(SEMANTIC_TEST_EXEC)
+	@echo "Running parser with semantic checks using semantic tests..."
+	@./$(SEMANTIC_TEST_EXEC) semantic/tests/normal semantic/tests/syntaxfehler
 
 # -----------------------
 # Run scanner test suite
@@ -167,15 +186,16 @@ clean:
 # -----------------------
 help:
 	@echo "Available commands:"
-	@echo "  make build                 - Build parser + scanner"
-	@echo "  make build_parser          - Build parser only"
-	@echo "  make build_scanner         - Build scanner only"
-	@echo "  make run file=FILE         - Run parser on FILE"
+	@echo "  make build                        - Build parser + scanner"
+	@echo "  make build_parser                 - Build parser only"
+	@echo "  make build_scanner                - Build scanner only"
+	@echo "  make run file=FILE                - Run parser on FILE"
 	@echo "  make run_parser_wo_semantic_tests - Run parser tests without semantic checks"
-	@echo "  make run_scanner_tests     - Run scanner test suite"
-	@echo "  make run_scanner_examples  - Run scanner on all examples and count errors"
-	@echo "  make clean                 - Remove all build artifacts"
-	@echo "  make help                  - Show this help"
+	@echo "  make run_parser_tests 			   - Run parser tests with semantic checks"
+	@echo "  make run_scanner_tests            - Run scanner test suite"
+	@echo "  make run_scanner_examples         - Run scanner on all examples and count errors"
+	@echo "  make clean                        - Remove all build artifacts"
+	@echo "  make help                         - Show this help"
 	@echo ""
 	@echo "To use a different main file for testing, call:"
 	@echo "  make MAIN_CPP=parser/my_pl-0.cpp build run file=FILE"
