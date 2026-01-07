@@ -16,7 +16,11 @@ int yyerror(const string &t);
 int yacc_error = 0;
 
 int yyerror(const char* t) { return yyerror(string(t)); }
-int yyerror(const string &t) { yacc_error = 1; return 0; }
+int yyerror(const string &t) {
+    yacc_error = 1;
+    //cout << t << endl;
+    return 0;
+}
 
 // -----------------------
 // Use Bison/Flex headers
@@ -33,8 +37,12 @@ int main(int argc, char * argv[]) {
 
     int rc = 0, n = 0, ok = 0;
 
-    string dir[] = {"parser/tests/normal/", "parser/tests/syntaxfehler/"};
-    int soll[] = {0,1};
+    // Get directories and expected return codes from argv
+
+    string dir[2] = {"parser/tests/normal/", "parser/tests/syntaxfehler/"};
+    dir[0] = argv[1];
+    dir[1] = argv[2];
+    int soll[2] = {0,1};
 
     for (size_t i = 0; i < sizeof(soll)/sizeof(soll[0]); i++) {
         string path = dir[i];
@@ -48,7 +56,7 @@ int main(int argc, char * argv[]) {
             string f(dp->d_name);
             if (f[0] == '.') continue;  // skip . and ..
 
-            yyin = fopen((path + dp->d_name).c_str(), "r");
+            yyin = fopen((path + "/" + dp->d_name).c_str(), "r");
             if (!yyin) { cerr << "Cannot open file: " << f << endl; continue; }
 
             yyrestart(yyin);  // reset scanner buffer
