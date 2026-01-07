@@ -1,9 +1,14 @@
-const x = 5, y = 10;
-var w, z;
+const q = 1;
+var z;
 procedure func;
-    var f;
-    w := y;
+    const z = 1;
+    var z;
+    procedure z;
+        z := 1;
+    begin
+        z := z;
+    end;
 
 begin
-  z := x + 1
+  call func;
 end.

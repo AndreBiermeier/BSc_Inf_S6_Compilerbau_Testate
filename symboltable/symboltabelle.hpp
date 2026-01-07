@@ -46,7 +46,7 @@ template <class ENTRY> void symtab<ENTRY>::level_down() {
 
 template <class ENTRY> int symtab<ENTRY>::insert(const string & name, const ENTRY & e){
 	int r = -1;
-	if (content[content.size()-1].find(name) == content[content.size()].end())
+	if (content[content.size()-1].find(name) == content[content.size()-1].end())
 		content[content.size()-1][name] = e; r = 0;
 	if (debug)
 		cerr << "Symtab-insert " << name << ": " << e << " Return Value: " << r << endl;
@@ -64,7 +64,7 @@ template <class ENTRY> int symtab<ENTRY>::lookup(const string & name, ENTRY & e,
 	if (i >= 0)
 		rc = 0, delta = content.size() - i - 1, e = content[i][name];
 	if (debug)
-		cerr << "Symtab-lookup " << name << ": " << e << " delta=" << delta << endl;
+		cerr << "Symtab-lookup " << name << ": " << e << " delta=" << delta << " Return:" << rc << endl;
 	return rc;
 }
 

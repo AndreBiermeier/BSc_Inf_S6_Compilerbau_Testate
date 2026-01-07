@@ -7,26 +7,50 @@ using namespace std;
 typedef tree<string> syntaxTree;
 typedef symtab<int> pl0_symtab;
 
+#define DEBUG true
+
 int yylex();
 void yyerror(const std::string &s);
 
 syntaxTree * root;
-pl0_symtab st (1);
+pl0_symtab st (DEBUG);
+bool semantic_error = false;
+
+enum{st_const = 1 << 0, st_var = 1 << 1, st_proc = 1 << 2};
 
 void insert_sym(string s, int type){
-    if (st.insert(s, type))
-        yyerror(string("duplicate sym ") + s);
+    if (st.insert(s, type)){
+        yyerror(string("invalid reassignment of symbol " + s));
+        semantic_error = true;
+    }
+    st.print();
 }
+
+string get_type_str(int type){
+    switch(type) {
+        case st_const: return "constant"; break;
+        case st_var:   return "variable"; break;
+        case st_proc:  return "procedure"; break;
+        default:       return "constant or variable"; break;
+    }
+}
+
 void check_sym(string s, int type){
     int typ = 0;
     int delta = 0;
-    if (st.lookup(s, typ, delta))
-        yyerror("undeclared sym " + s);
-    else if (!(typ & type))
-        yyerror("wrong sum-type " + s);
-    cout << "check sym " << type << " " << type << endl;
+    string type_str = get_type_str(type);
+    if (st.lookup(s, typ, delta)){
+        yyerror(type_str + " '" + s + "' is undefined!");
+        semantic_error = true;
+    }
+    else if (!(typ & type)){
+        string typ_str = get_type_str(typ);
+        yyerror("expected " + type_str + " but '" + s + "' is a " + typ_str);
+        semantic_error = true;
+    }
+    if (DEBUG)
+        cout << "Checked Symbol: " << s << " ! Expected type: " << type << " ST type: " << typ << endl;
 }
-enum{st_const = 1 << 0, st_var = 1 << 1, st_proc = 1 << 2};
 
 typedef symtab<int> pl0_symtab;
 %}
@@ -55,9 +79,9 @@ typedef symtab<int> pl0_symtab;
 
 %%
 
-program         :       block t_punkt						                {$$ = new syntaxTree("program"); $$->append($1); root = $$; root->ascii();}
+program         :       block t_punkt						                {$$ = new syntaxTree("program"); $$->append($1); root = $$; if(semantic_error) YYERROR; if(DEBUG) root->ascii();}
 ;
-block           :       {st.level_up();} constdecl vardecl proclist statement			    {$$ = new syntaxTree("block"); $$->append($2); $$->append($3); $$->append($4); $$->append($5);st.level_down();}
+block           : {st.level_up();} constdecl vardecl proclist statement		{$$ = new syntaxTree("block"); $$->append($2); $$->append($3); $$->append($4); $$->append($5);st.level_down();}
 ;
 constdecl       :       /* epsilon */						                {$$ = nullptr;}
                     |   t_const t_ident t_eq t_number constlist t_semik		{$$ = new syntaxTree("constdecl"); auto first = new syntaxTree("const"); first->append(new syntaxTree($2)); first->append(new syntaxTree($4)); insert_sym($2, st_const); $$->append(first); if ($5) $$->append($5);}
@@ -72,12 +96,13 @@ varlist         :       /* epsilon */                                       {$$ 
                     |   varlist t_komma t_ident                             {auto v = new syntaxTree("var"); v->append(new syntaxTree($3)); insert_sym($3, st_var); if ($1) {$1->append(v); $$ = $1;} else {$$ = new syntaxTree("varlist"); $$->append(v);}}
 ;
 proclist        :       /* epsilon */                                       {$$ = nullptr;}
-                    |   proclist t_proc t_ident t_semik block t_semik       {auto p = new syntaxTree("proc"); p->append(new syntaxTree("ident")); p->append(new syntaxTree("block")); insert_sym($3, st_proc); if ($1) {$1->append(p); $$ = $1;} else {$$ = new syntaxTree("proclist"); $$->append(p);}}
+                    |   proclist t_proc t_ident t_semik
+                        {insert_sym($3, st_proc);} block t_semik            {auto p = new syntaxTree("proc"); p->append(new syntaxTree($3)); p->append($6); if ($1) {$1->append(p); $$ = $1;} else {$$ = new syntaxTree("proclist"); $$->append(p);}}
 ;
 statement       :       /* epsilon */                                       {$$ = nullptr;}
-                    |   t_ident t_assign expression                         {$$ = new syntaxTree("statement"); auto a = new syntaxTree("assign"); a->append(new syntaxTree("ident")); a->append($3); $$->append(a);}
-                    |   t_call t_ident                                      {$$ = new syntaxTree("statement"); auto c = new syntaxTree("call"); c->append(new syntaxTree("ident")); $$->append(c);}
-                    |   t_read t_ident                                      {$$ = new syntaxTree("statement"); auto r = new syntaxTree("read"); r->append(new syntaxTree("ident")); $$->append(r);}
+                    |   t_ident t_assign expression                         {$$ = new syntaxTree("statement"); auto a = new syntaxTree("assign"); a->append(new syntaxTree($1)); check_sym($1, st_var); a->append($3); $$->append(a);}
+                    |   t_call t_ident                                      {$$ = new syntaxTree("statement"); auto c = new syntaxTree("call"); c->append(new syntaxTree($2)); check_sym($2, st_proc); $$->append(c);}
+                    |   t_read t_ident                                      {$$ = new syntaxTree("statement"); auto r = new syntaxTree("read"); r->append(new syntaxTree($2)); check_sym($2, st_var); $$->append(r);}
                     |   t_write expression                                  {$$ = new syntaxTree("statement"); auto w = new syntaxTree("write"); w->append($2); $$->append(w);}
                     |   t_begin statement statementlist t_end               {$$ = new syntaxTree("statement"); auto s = new syntaxTree("begin_end"); if ($2) s->append($2); if ($3) s->append($3); $$->append(s);}
                     |   t_if condition t_then statement                     {$$ = new syntaxTree("statement"); auto i = new syntaxTree("if"); i->append($2); i->append($4); $$->append(i);}
@@ -108,7 +133,7 @@ factorlist      :       /* epsilon */                                       {$$ 
                     |   factorlist t_mult factor                            {auto mf = new syntaxTree("*"); mf->append($3); if ($1) {$1->append(mf); $$ = $1;} else {$$ = new syntaxTree("factorlist"); $$->append(mf);}}
                     |   factorlist t_div factor                             {auto df = new syntaxTree("/"); df->append($3); if ($1) {$1->append(df); $$ = $1;} else {$$ = new syntaxTree("factorlist"); $$->append(df);}}
 ;
-factor          :       t_ident                                             {$$ = new syntaxTree("factor"); auto i = new syntaxTree("ident"); i->append(new syntaxTree($1)); $$->append(i);}
+factor          :       t_ident                                             {$$ = new syntaxTree("factor"); auto i = new syntaxTree("ident"); i->append(new syntaxTree($1)); check_sym($1, st_var | st_const); $$->append(i);}
                     |   t_number                                            {$$ = new syntaxTree("factor"); auto n = new syntaxTree("number"); n->append(new syntaxTree($1)); $$->append(n);}
                     |   t_bra_o expression t_bra_c                          {$$ = new syntaxTree("factor"); $$->append($2);}
                     |   t_minus factor                                      {$$ = new syntaxTree("factor"); auto m = new syntaxTree("-"); m->append($2); $$->append(m);}
