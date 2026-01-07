@@ -3,10 +3,9 @@
 #include <iostream>
 
 int yylex();
-int yyerror(string);
+int yyerror(const std::string &s);
 extern int yacc_error;
 
-bool first_factor_of_expression = true;
 %}
 %defines "y.tab.h"
 
@@ -58,7 +57,7 @@ compare         :       t_eq
                     |   t_gt
                     |   t_ge
 ;
-expression      :       /* new expression */            {first_factor_of_expression = true;}
+expression      :       /* new expression */
                         term termlist
 ;
 termlist        :       /* epsilon */
@@ -71,12 +70,12 @@ factorlist      :       /* epsilon */
                     |   factorlist t_mult factor
                     |   factorlist t_div factor
 ;
-factor          :       t_ident                         {first_factor_of_expression = false;}
-                    |   t_number                        {first_factor_of_expression = false;}
-                    |   t_bra_o expression t_bra_c      {first_factor_of_expression = false;}
-                    |   t_minus                         {if (!first_factor_of_expression) {yyerror("-- or +- not allowed. Use brackets!"); YYABORT;} first_factor_of_expression = false;}
+factor          :       t_ident
+                    |   t_number
+                    |   t_bra_o expression t_bra_c
+                    |   t_minus
                         factor
-                    |   t_plus                          {if (!first_factor_of_expression) {yyerror("-+ or ++ not allowed. Use brackets!"); YYABORT;} first_factor_of_expression = false;}
+                    |   t_plus
                         factor
 ;
 

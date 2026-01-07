@@ -20,21 +20,26 @@ CXXFLAGS := -std=c++17 -Wall -O2 -I$(PARSER_DIR) -I$(SCANNER_DIR) -I$(SEMANTIC_D
 # -----------------------
 MAIN_CPP ?= $(PARSER_DIR)/my_pl-0.cpp
 TEST_MAIN_CPP := $(PARSER_DIR)/pl-0.cpp
-YACC_SRC := $(PARSER_DIR)/pl0.y
-LEX_SRC := $(SCANNER_DIR)/pl0-scanner.l
 
+YACC_SRC := $(PARSER_DIR)/pl0.y
 YACC_C := $(BUILD_DIR)/pl0.tab.c
 YACC_H := $(BUILD_DIR)/pl0.tab.h
+
+# Parser for tests (without semantic checks)
+TEST_YACC_SRC := $(PARSER_DIR)/pl0_without_semantics.y
+TEST_YACC_C   := $(BUILD_DIR)/pl0_no_sem.tab.c
+TEST_YACC_H   := $(BUILD_DIR)/pl0_no_sem.tab.h
+
+LEX_SRC := $(SCANNER_DIR)/pl0-scanner.l
 LEX_C := $(BUILD_DIR)/pl0.yy.c
 
+# Objects
 PARSER_OBJ := $(BUILD_DIR)/main.o $(BUILD_DIR)/pl0.tab.o $(BUILD_DIR)/pl0.yy.o
 PARSER_EXEC := $(BUILD_DIR)/pl0_parser
 
-# Parser for test main (wo semantic checks)
-TEST_PARSER_OBJ := $(BUILD_DIR)/main_test.o $(BUILD_DIR)/pl0.tab.o $(BUILD_DIR)/pl0.yy.o
+TEST_PARSER_OBJ := $(BUILD_DIR)/main_test.o $(BUILD_DIR)/pl0_no_sem.tab.o $(BUILD_DIR)/pl0.yy.o
 TEST_PARSER_EXEC := $(BUILD_DIR)/pl0_test_parser
 
-# Scanner
 SCANNER_OBJ := $(BUILD_DIR)/scanner.o
 SCANNER_EXEC := $(BUILD_DIR)/pl0_scanner
 
@@ -62,6 +67,13 @@ $(YACC_C) $(YACC_H): $(YACC_SRC) | $(BUILD_DIR)
 
 $(BUILD_DIR)/pl0.tab.o: $(YACC_C) $(YACC_H) | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $(YACC_C) -o $(BUILD_DIR)/pl0.tab.o
+
+# Generate and compile test parser (no semantics)
+$(TEST_YACC_C) $(TEST_YACC_H): $(TEST_YACC_SRC) | $(BUILD_DIR)
+	cd $(PARSER_DIR) && $(YACC) -d -o ../$(TEST_YACC_C) pl0_without_semantics.y
+
+$(BUILD_DIR)/pl0_no_sem.tab.o: $(TEST_YACC_C) $(TEST_YACC_H) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -c $(TEST_YACC_C) -o $(BUILD_DIR)/pl0_no_sem.tab.o
 
 # -----------------------
 # Generate and compile Flex scanner
@@ -122,7 +134,7 @@ run: $(PARSER_EXEC)
 	fi
 
 # -----------------------
-# Run parser without semantic checks (pl-0.cpp tests)
+# Run parser without semantic checks (pl0_without_semantics.y)
 # -----------------------
 run_parser_wo_semantic_tests: clean $(TEST_PARSER_EXEC)
 	@echo "Running parser without semantic checks using parser tests..."
