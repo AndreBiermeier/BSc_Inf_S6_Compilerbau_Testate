@@ -1,23 +1,26 @@
 %{
+#define DEBUG false
+
 #include "../tree/tree.hpp"
+#include "../symboltable/symboltabelle.hpp"
 #include <string>
 #include <iostream>
-#include "../symboltable/symboltabelle.hpp"
-using namespace std;
 typedef tree<string> syntaxTree;
 typedef symtab<int> pl0_symtab;
 
-#define DEBUG true
+using namespace std;
+
 
 int yylex();
 void yyerror(const std::string &s);
+enum{st_const = 1 << 0, st_var = 1 << 1, st_proc = 1 << 2};
 
+// Globals
 syntaxTree * root;
 pl0_symtab st (DEBUG);
 bool semantic_error = false;
 
-enum{st_const = 1 << 0, st_var = 1 << 1, st_proc = 1 << 2};
-
+// Helper functions
 void insert_sym(string s, int type){
     if (st.insert(s, type)){
         yyerror(string("invalid reassignment of symbol " + s));
@@ -45,14 +48,12 @@ void check_sym(string s, int type){
     }
     else if (!(typ & type)){
         string typ_str = get_type_str(typ);
-        yyerror("expected " + type_str + " but '" + s + "' is a " + typ_str);
+        yyerror("expected a " + type_str + " but '" + s + "' is a " + typ_str);
         semantic_error = true;
     }
     if (DEBUG)
         cout << "Checked Symbol: " << s << " ! Expected type: " << type << " ST type: " << typ << endl;
 }
-
-typedef symtab<int> pl0_symtab;
 %}
 
 
@@ -72,7 +73,8 @@ typedef symtab<int> pl0_symtab;
 %token <txt> t_number
 %token t_error
 
-%type <tree_node> program block constdecl constlist vardecl varlist proclist statement statementlist condition compare expression term termlist factor factorlist
+%type <tree_node> program block constdecl constlist vardecl varlist proclist statement
+%type <tree_node> statementlist condition compare expression term termlist factor factorlist
 
 %left t_plus t_minus
 %left t_mult t_div
