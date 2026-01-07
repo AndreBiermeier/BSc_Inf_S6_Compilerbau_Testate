@@ -56,8 +56,7 @@ void check_sym(string s, int type){
 }
 %}
 
-
-%defines "y.tab.h"
+%defines "y.tab.h" // Tells Bison to generate the header file with the tokens for the scanner.
 
 %union {
     tree<string> * tree_node;
