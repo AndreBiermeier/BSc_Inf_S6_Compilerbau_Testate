@@ -5,6 +5,9 @@
 # Assembly
 *.asm text eol=lf
 
+# PL0
+*.pl0
+
 # C / C++ source files
 *.c   text eol=lf
 *.h   text eol=lf
