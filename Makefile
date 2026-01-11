@@ -41,6 +41,7 @@ TEST_PARSER_OBJ := $(BUILD_DIR)/main_test.o $(BUILD_DIR)/pl0_no_sem.tab.o $(BUIL
 TEST_PARSER_EXEC := $(BUILD_DIR)/pl0_test_parser
 
 SCANNER_OBJ := $(BUILD_DIR)/scanner.o
+SCANNER_STUB_OBJ := $(BUILD_DIR)/parser_stubs.o
 SCANNER_EXEC := $(BUILD_DIR)/pl0_scanner
 
 SEMANTIC_TEST_MAIN := $(PARSER_DIR)/pl-0.cpp
@@ -98,8 +99,11 @@ $(BUILD_DIR)/pl0.yy.o: $(LEX_C) $(YACC_H) | $(BUILD_DIR)
 $(SCANNER_OBJ): $(SCANNER_DIR)/test.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $(SCANNER_DIR)/test.cpp -o $(SCANNER_OBJ)
 
-$(SCANNER_EXEC): $(SCANNER_OBJ) $(BUILD_DIR)/pl0.yy.o | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) $(SCANNER_OBJ) $(BUILD_DIR)/pl0.yy.o -o $(SCANNER_EXEC)
+$(SCANNER_STUB_OBJ): $(SCANNER_DIR)/parser_stubs.cpp | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -c $(SCANNER_DIR)/parser_stubs.cpp -o $(SCANNER_STUB_OBJ)
+
+$(SCANNER_EXEC): $(SCANNER_OBJ) $(BUILD_DIR)/pl0.yy.o $(SCANNER_STUB_OBJ) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) $(SCANNER_OBJ) $(BUILD_DIR)/pl0.yy.o $(SCANNER_STUB_OBJ) -o $(SCANNER_EXEC)
 
 # -----------------------
 # Link parser executable
@@ -191,7 +195,7 @@ help:
 	@echo "  make build_scanner                - Build scanner only"
 	@echo "  make run file=FILE                - Run parser on FILE"
 	@echo "  make run_parser_wo_semantic_tests - Run parser tests without semantic checks"
-	@echo "  make run_parser_tests 			   - Run parser tests with semantic checks"
+	@echo "  make run_parser_tests             - Run parser tests with semantic checks"
 	@echo "  make run_scanner_tests            - Run scanner test suite"
 	@echo "  make run_scanner_examples         - Run scanner on all examples and count errors"
 	@echo "  make clean                        - Remove all build artifacts"

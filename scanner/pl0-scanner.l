@@ -46,7 +46,7 @@ odd|ODD	                return t_odd;
 ")"                     return t_bra_c;
 [a-zA-Z_][a-zA-Z0-9_]*  {yylval.txt = strdup(yytext); return t_ident;};
 [0-9]+                  {yylval.txt = strdup(yytext); return t_number;};
-[ \t\n\f]               ;
+[ \t\r\n\f]             ;
 .                       return t_error;
 %%
 
