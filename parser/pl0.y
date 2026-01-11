@@ -54,6 +54,11 @@ void check_sym(string s, int type){
     if (DEBUG)
         cout << "Checked Symbol: " << s << " ! Expected type: " << type << " ST type: " << typ << endl;
 }
+
+void reset_parser_state() {
+    semantic_error = false;
+    st = pl0_symtab(DEBUG);
+}
 %}
 
 %defines "y.tab.h" // Tells Bison to generate the header file with the tokens for the scanner.
@@ -80,7 +85,7 @@ void check_sym(string s, int type){
 
 %%
 
-program         :       block t_punkt						                {$$ = new syntaxTree("program"); $$->append($1); root = $$; if(semantic_error) YYERROR; if(DEBUG) root->ascii();}
+program         : {reset_parser_state();} block t_punkt						{$$ = new syntaxTree("program"); $$->append($2); root = $$; if(semantic_error) YYERROR; if(DEBUG) root->ascii();}
 ;
 block           : {st.level_up();} constdecl vardecl proclist statement		{$$ = new syntaxTree("block"); $$->append($2); $$->append($3); $$->append($4); $$->append($5);st.level_down();}
 ;
