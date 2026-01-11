@@ -1,0 +1,10 @@
+VAR x;
+begin
+x := 1;
+BEGIN
+    BEGIN
+        x := x + 1
+    END;
+    ! x
+END
+end.

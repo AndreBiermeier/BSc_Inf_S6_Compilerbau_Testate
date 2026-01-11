@@ -1,0 +1,17 @@
+VAR x;
+PROCEDURE outer;
+VAR y;
+    PROCEDURE inner;
+    BEGIN
+        y := y + 1;
+        ! y
+    END;
+    BEGIN
+        y := 0;
+        CALL inner
+    END;
+begin
+x := 5;
+CALL outer;
+! x
+end.

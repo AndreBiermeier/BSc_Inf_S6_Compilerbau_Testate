@@ -1,0 +1,12 @@
+VAR x;
+PROCEDURE p;
+VAR x;
+BEGIN
+    x := 10;
+    ! x
+END;
+begin
+x := 1;
+CALL p;
+! x
+end.

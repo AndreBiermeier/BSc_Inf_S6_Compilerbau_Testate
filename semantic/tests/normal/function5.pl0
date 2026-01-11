@@ -1,0 +1,6 @@
+var z, y;
+procedure a;
+    var y;
+    ;
+! z + y
+.

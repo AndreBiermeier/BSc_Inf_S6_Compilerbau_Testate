@@ -1,0 +1,9 @@
+VAR x;
+begin
+x := 5;
+WHILE x > 0 DO
+BEGIN
+    ! x;
+    x := x - 1
+END
+end.

@@ -1,0 +1,10 @@
+const y = 1;
+var x;
+procedure a;
+    const z = 2;;
+begin
+    x := x;
+    x := y + 1;
+    x := a
+end
+.

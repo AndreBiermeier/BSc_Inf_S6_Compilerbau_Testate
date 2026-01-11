@@ -1,0 +1,7 @@
+CONST a = 5;
+VAR x;
+begin
+x := a;
+! x
+end
+.

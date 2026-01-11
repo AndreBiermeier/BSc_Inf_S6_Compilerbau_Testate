@@ -1,0 +1,11 @@
+VAR x;
+PROCEDURE inc;
+BEGIN
+    x := x + 1
+END;
+begin
+x := 0;
+CALL inc;
+CALL inc;
+! x
+end.

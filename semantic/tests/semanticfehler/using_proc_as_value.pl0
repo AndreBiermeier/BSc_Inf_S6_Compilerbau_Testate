@@ -1,0 +1,5 @@
+VAR x;
+PROCEDURE p;
+BEGIN
+END;
+x := p.

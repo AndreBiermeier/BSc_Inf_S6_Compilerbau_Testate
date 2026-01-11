@@ -1,0 +1,4 @@
+PROCEDURE p;
+BEGIN
+END;
+p := 3.

@@ -157,7 +157,7 @@ run_parser_wo_semantic_tests: clean $(TEST_PARSER_EXEC)
 # -----------------------
 run_parser_tests: clean $(SEMANTIC_TEST_EXEC)
 	@echo "Running parser with semantic checks using semantic tests..."
-	@./$(SEMANTIC_TEST_EXEC) semantic/tests/normal semantic/tests/syntaxfehler
+	@./$(SEMANTIC_TEST_EXEC) semantic/tests/normal semantic/tests/semanticfehler
 
 # -----------------------
 # Run scanner test suite

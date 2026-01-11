@@ -1,0 +1,11 @@
+var y;
+procedure a;
+    var y;
+    ;
+procedure b;
+    var y;
+    procedure c;
+        ;
+    ;
+call c
+.

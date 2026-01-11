@@ -1,0 +1,6 @@
+CONST c = 10;
+VAR x;
+begin
+x := c / 2 + 3;
+! x
+end.
