@@ -1,0 +1,24 @@
+var x;
+
+procedure a;
+procedure c;
+begin
+  x := x + 100;
+  ! x
+end;
+begin
+  call c
+end;
+
+procedure b;
+begin
+  x := x + 1;
+  ! x
+end;
+
+begin
+  x := 0;
+  call b;
+  call a;
+  call b
+end.

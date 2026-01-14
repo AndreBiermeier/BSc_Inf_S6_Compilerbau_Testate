@@ -1,0 +1,16 @@
+var i, sum, tmp;
+
+begin
+  i := 0;
+  sum := 0;
+
+  ; ; ;
+
+  while i < 10 do begin
+    if odd i then sum := sum + i;
+    i := i + 1
+  end;
+
+  tmp := -(-sum) + (+0);
+  ! tmp
+end.
