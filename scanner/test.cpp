@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include "pl0tokens.h"
 #include "../tree/tree.hpp"
-
+#include "../parser/y.tab.h"   // YYSTYPE + token definitions used by scanner
+YYSTYPE yylval;               // provide yylval for scanner-only executable
 
 extern int yylex();
 extern char *yytext;

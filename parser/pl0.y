@@ -1,5 +1,11 @@
 %{
-#define DEBUG false
+#define DEBUG_GRAMMAR false
+#define DEBUG_SYMTAB false
+#define DEBUG_AST false
+#define PRINT_TIKZ true
+#define PRINT_AST false
+
+#define MAKE_AST true
 
 #include "../tree/tree.hpp"
 #include "../symboltable/symboltabelle.hpp"
@@ -17,9 +23,9 @@ void yyerror(const std::string &s);
 
 // Globals
 syntaxTree * root;
-pl0_symtab st (DEBUG);
+pl0_symtab st (DEBUG_SYMTAB);
 bool semantic_error = false;
-PT2AST pt2ast (true);
+PT2AST pt2ast (DEBUG_AST);
 ast ast_root;
 
 // Helper functions
@@ -53,13 +59,13 @@ void check_sym(string s, int type){
         yyerror("expected a " + type_str + " but '" + s + "' is a " + typ_str);
         semantic_error = true;
     }
-    if (DEBUG)
+    if (DEBUG_SYMTAB)
         cout << "Checked Symbol: " << s << " ! Expected type: " << type << " ST type: " << typ << endl;
 }
 
 void reset_parser_state() {
     semantic_error = false;
-    st = pl0_symtab(DEBUG);
+    st = pl0_symtab(DEBUG_SYMTAB);
 }
 %}
 
@@ -87,7 +93,7 @@ void reset_parser_state() {
 
 %%
 
-program         : {reset_parser_state();} block t_punkt						{$$ = new syntaxTree("program"); $$->append($2); root = $$; if(semantic_error) YYERROR; if(DEBUG) root->ascii(); ast_root = pt2ast.convert_syntax_tree(root); ast_root.tikz();}
+program         : {reset_parser_state();} block t_punkt						{$$ = new syntaxTree("program"); $$->append($2); root = $$; if(semantic_error) YYERROR; if(DEBUG_GRAMMAR) root->ascii(); if (MAKE_AST ) {ast_root = pt2ast.convert_syntax_tree(root); if (PRINT_AST) ast_root.print(); if (PRINT_TIKZ) ast_root.tikz();}}
 ;
 block           : {st.level_up();} constdecl vardecl proclist statement		{$$ = new syntaxTree("block"); $$->append($2); $$->append($3); $$->append($4); $$->append($5);st.level_down();}
 ;
