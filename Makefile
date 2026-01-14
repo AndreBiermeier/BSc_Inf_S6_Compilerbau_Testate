@@ -40,7 +40,19 @@ LEX_C := $(BUILD_DIR)/pl0.yy.c
 AST_CPP := $(AST_DIR)/ast.cpp
 RAM_CPP := $(RAM_DIR)/ram.cpp
 
+# AST builder source
+AST_BUILDER_CPP := $(AST_DIR)/ast_builder.cpp
+
+# -----------------------
+# Special: generate y.tab.h where scanner expects it
+# (scanner/pl0-scanner.l includes "../parser/y.tab.h")
+# -----------------------
+PARSER_YTAB_C := $(PARSER_DIR)/y.tab.c
+PARSER_YTAB_H := $(PARSER_DIR)/y.tab.h
+
+# -----------------------
 # Objects
+# -----------------------
 PARSER_OBJ := $(BUILD_DIR)/main.o $(BUILD_DIR)/pl0.tab.o $(BUILD_DIR)/pl0.yy.o
 PARSER_EXEC := $(BUILD_DIR)/pl0_parser
 
@@ -55,9 +67,9 @@ SEMANTIC_TEST_MAIN := $(PARSER_DIR)/pl-0.cpp
 SEMANTIC_TEST_OBJ  := $(BUILD_DIR)/main_sem.o $(BUILD_DIR)/pl0.tab.o $(BUILD_DIR)/pl0.yy.o
 SEMANTIC_TEST_EXEC := $(BUILD_DIR)/pl0_semantic_test
 
-# AST / RAM objects
 AST_OBJ := $(BUILD_DIR)/ast.o
 RAM_OBJ := $(BUILD_DIR)/ram.o
+AST_BUILDER_OBJ := $(BUILD_DIR)/ast_builder.o
 
 # -----------------------
 # Create build directory
@@ -66,21 +78,21 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 # -----------------------
-# Compile main parser file
+# Compile main files
 # -----------------------
 $(BUILD_DIR)/main.o: $(MAIN_CPP) | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $(MAIN_CPP) -o $(BUILD_DIR)/main.o
 
-# Compile test main parser file (pl-0.cpp)
-$(BUILD_DIR)/main_test.o: $(TEST_MAIN_CPP) | $(BUILD_DIR)
+# If pl-0.cpp includes y.tab.h, ensure header exists first (safe even if it doesn't)
+$(BUILD_DIR)/main_test.o: $(TEST_MAIN_CPP) $(PARSER_YTAB_H) | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $(TEST_MAIN_CPP) -o $(BUILD_DIR)/main_test.o
 
-# Compile semantic test main
-$(BUILD_DIR)/main_sem.o: $(SEMANTIC_TEST_MAIN) | $(BUILD_DIR)
+# Semantic test main also includes y.tab.h => must depend on it
+$(BUILD_DIR)/main_sem.o: $(SEMANTIC_TEST_MAIN) $(PARSER_YTAB_H) | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $(SEMANTIC_TEST_MAIN) -o $(BUILD_DIR)/main_sem.o
 
 # -----------------------
-# Compile AST / RAM
+# Compile AST / RAM / AST builder
 # -----------------------
 $(AST_OBJ): $(AST_CPP) | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $(AST_CPP) -o $(AST_OBJ)
@@ -88,8 +100,17 @@ $(AST_OBJ): $(AST_CPP) | $(BUILD_DIR)
 $(RAM_OBJ): $(RAM_CPP) | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $(RAM_CPP) -o $(RAM_OBJ)
 
+$(AST_BUILDER_OBJ): $(AST_BUILDER_CPP) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -c $(AST_BUILDER_CPP) -o $(AST_BUILDER_OBJ)
+
 # -----------------------
-# Generate and compile Bison parser
+# Generate parser header where scanner expects it (parser/y.tab.h)
+# -----------------------
+$(PARSER_YTAB_C) $(PARSER_YTAB_H): $(YACC_SRC)
+	cd $(PARSER_DIR) && $(YACC) -d pl0.y
+
+# -----------------------
+# Generate and compile Bison parser into build dir (cmake-build-debug/pl0.tab.*)
 # -----------------------
 $(YACC_C) $(YACC_H): $(YACC_SRC) | $(BUILD_DIR)
 	cd $(PARSER_DIR) && $(YACC) -d -o ../$(YACC_C) pl0.y
@@ -106,17 +127,18 @@ $(BUILD_DIR)/pl0_no_sem.tab.o: $(TEST_YACC_C) $(TEST_YACC_H) | $(BUILD_DIR)
 
 # -----------------------
 # Generate and compile Flex scanner
+# NOTE: depend on parser/y.tab.h because lexer includes "../parser/y.tab.h"
 # -----------------------
-$(LEX_C): $(LEX_SRC) $(YACC_H) | $(BUILD_DIR)
+$(LEX_C): $(LEX_SRC) $(PARSER_YTAB_H) | $(BUILD_DIR)
 	$(LEX) -o $(LEX_C) $(LEX_SRC)
 
-$(BUILD_DIR)/pl0.yy.o: $(LEX_C) $(YACC_H) | $(BUILD_DIR)
+$(BUILD_DIR)/pl0.yy.o: $(LEX_C) $(PARSER_YTAB_H) | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $(LEX_C) -o $(BUILD_DIR)/pl0.yy.o
 
 # -----------------------
-# Build scanner executable
+# Build scanner executable (scanner tests)
 # -----------------------
-$(SCANNER_OBJ): $(SCANNER_DIR)/test.cpp | $(BUILD_DIR)
+$(SCANNER_OBJ): $(SCANNER_DIR)/test.cpp $(PARSER_YTAB_H) | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $(SCANNER_DIR)/test.cpp -o $(SCANNER_OBJ)
 
 $(SCANNER_STUB_OBJ): $(SCANNER_DIR)/parser_stubs.cpp | $(BUILD_DIR)
@@ -126,18 +148,16 @@ $(SCANNER_EXEC): $(SCANNER_OBJ) $(BUILD_DIR)/pl0.yy.o $(SCANNER_STUB_OBJ) | $(BU
 	$(CXX) $(CXXFLAGS) $(SCANNER_OBJ) $(BUILD_DIR)/pl0.yy.o $(SCANNER_STUB_OBJ) -o $(SCANNER_EXEC)
 
 # -----------------------
-# Link parser executable
+# Link parser executables
 # -----------------------
-$(PARSER_EXEC): $(PARSER_OBJ) $(AST_OBJ) $(RAM_OBJ) | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) $(PARSER_OBJ) $(AST_OBJ) $(RAM_OBJ) -o $(PARSER_EXEC)
+$(PARSER_EXEC): $(PARSER_OBJ) $(AST_OBJ) $(RAM_OBJ) $(AST_BUILDER_OBJ) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) $(PARSER_OBJ) $(AST_OBJ) $(RAM_OBJ) $(AST_BUILDER_OBJ) -o $(PARSER_EXEC)
 
-# Link test parser executable (wo semantic checks)
 $(TEST_PARSER_EXEC): $(TEST_PARSER_OBJ) | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $(TEST_PARSER_OBJ) -o $(TEST_PARSER_EXEC)
 
-# Link semantic test executable
-$(SEMANTIC_TEST_EXEC): $(SEMANTIC_TEST_OBJ) $(AST_OBJ) $(RAM_OBJ) | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) $(SEMANTIC_TEST_OBJ) $(AST_OBJ) $(RAM_OBJ) -o $(SEMANTIC_TEST_EXEC)
+$(SEMANTIC_TEST_EXEC): $(SEMANTIC_TEST_OBJ) $(AST_OBJ) $(RAM_OBJ) $(AST_BUILDER_OBJ) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) $(SEMANTIC_TEST_OBJ) $(AST_OBJ) $(RAM_OBJ) $(AST_BUILDER_OBJ) -o $(SEMANTIC_TEST_EXEC)
 
 # -----------------------
 # Phony targets
@@ -203,6 +223,7 @@ run_scanner_examples: $(SCANNER_EXEC)
 clean:
 	@echo "Cleaning build artifacts..."
 	@rm -rf $(BUILD_DIR)/*
+	@rm -f $(PARSER_YTAB_C) $(PARSER_YTAB_H)
 	@echo "Clean complete."
 
 # -----------------------
