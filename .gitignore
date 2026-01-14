@@ -28,6 +28,7 @@ scanner/examples/output
 **/*.yy.cpp
 **/*.yy.h
 **/results.txt
+**/pl0.tab.c
 
 
 # Logs and temp
