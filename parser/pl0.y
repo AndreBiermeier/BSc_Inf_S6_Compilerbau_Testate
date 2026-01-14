@@ -1,5 +1,5 @@
 %{
-#define DEBUG false
+#define DEBUG true
 
 #include "../tree/tree.hpp"
 #include "../symboltable/symboltabelle.hpp"
