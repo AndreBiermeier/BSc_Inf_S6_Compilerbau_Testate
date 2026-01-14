@@ -6,6 +6,8 @@ PARSER_DIR := parser
 SCANNER_DIR := scanner
 SEMANTIC_DIR := semantic
 TREE_DIR := tree
+AST_DIR := ast
+RAM_DIR := ast
 
 # -----------------------
 # Compiler / Tools
@@ -13,7 +15,8 @@ TREE_DIR := tree
 CXX := g++
 LEX := flex
 YACC := bison
-CXXFLAGS := -std=c++17 -Wall -O2 -I$(PARSER_DIR) -I$(SCANNER_DIR) -I$(SEMANTIC_DIR) -I$(TREE_DIR)
+CXXFLAGS := -std=c++17 -Wall -O2 \
+	-I$(PARSER_DIR) -I$(SCANNER_DIR) -I$(SEMANTIC_DIR) -I$(TREE_DIR) -I$(AST_DIR)
 
 # -----------------------
 # Files
@@ -33,6 +36,10 @@ TEST_YACC_H   := $(BUILD_DIR)/pl0_no_sem.tab.h
 LEX_SRC := $(SCANNER_DIR)/pl0-scanner.l
 LEX_C := $(BUILD_DIR)/pl0.yy.c
 
+# AST / RAM sources
+AST_CPP := $(AST_DIR)/ast.cpp
+RAM_CPP := $(RAM_DIR)/ram.cpp
+
 # Objects
 PARSER_OBJ := $(BUILD_DIR)/main.o $(BUILD_DIR)/pl0.tab.o $(BUILD_DIR)/pl0.yy.o
 PARSER_EXEC := $(BUILD_DIR)/pl0_parser
@@ -47,6 +54,10 @@ SCANNER_EXEC := $(BUILD_DIR)/pl0_scanner
 SEMANTIC_TEST_MAIN := $(PARSER_DIR)/pl-0.cpp
 SEMANTIC_TEST_OBJ  := $(BUILD_DIR)/main_sem.o $(BUILD_DIR)/pl0.tab.o $(BUILD_DIR)/pl0.yy.o
 SEMANTIC_TEST_EXEC := $(BUILD_DIR)/pl0_semantic_test
+
+# AST / RAM objects
+AST_OBJ := $(BUILD_DIR)/ast.o
+RAM_OBJ := $(BUILD_DIR)/ram.o
 
 # -----------------------
 # Create build directory
@@ -67,6 +78,15 @@ $(BUILD_DIR)/main_test.o: $(TEST_MAIN_CPP) | $(BUILD_DIR)
 # Compile semantic test main
 $(BUILD_DIR)/main_sem.o: $(SEMANTIC_TEST_MAIN) | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $(SEMANTIC_TEST_MAIN) -o $(BUILD_DIR)/main_sem.o
+
+# -----------------------
+# Compile AST / RAM
+# -----------------------
+$(AST_OBJ): $(AST_CPP) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -c $(AST_CPP) -o $(AST_OBJ)
+
+$(RAM_OBJ): $(RAM_CPP) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -c $(RAM_CPP) -o $(RAM_OBJ)
 
 # -----------------------
 # Generate and compile Bison parser
@@ -108,16 +128,16 @@ $(SCANNER_EXEC): $(SCANNER_OBJ) $(BUILD_DIR)/pl0.yy.o $(SCANNER_STUB_OBJ) | $(BU
 # -----------------------
 # Link parser executable
 # -----------------------
-$(PARSER_EXEC): $(PARSER_OBJ) | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) $(PARSER_OBJ) -o $(PARSER_EXEC)
+$(PARSER_EXEC): $(PARSER_OBJ) $(AST_OBJ) $(RAM_OBJ) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) $(PARSER_OBJ) $(AST_OBJ) $(RAM_OBJ) -o $(PARSER_EXEC)
 
 # Link test parser executable (wo semantic checks)
 $(TEST_PARSER_EXEC): $(TEST_PARSER_OBJ) | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $(TEST_PARSER_OBJ) -o $(TEST_PARSER_EXEC)
 
 # Link semantic test executable
-$(SEMANTIC_TEST_EXEC): $(SEMANTIC_TEST_OBJ) | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) $(SEMANTIC_TEST_OBJ) -o $(SEMANTIC_TEST_EXEC)
+$(SEMANTIC_TEST_EXEC): $(SEMANTIC_TEST_OBJ) $(AST_OBJ) $(RAM_OBJ) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) $(SEMANTIC_TEST_OBJ) $(AST_OBJ) $(RAM_OBJ) -o $(SEMANTIC_TEST_EXEC)
 
 # -----------------------
 # Phony targets

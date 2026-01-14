@@ -1,10 +1,11 @@
 %{
-#define DEBUG true
+#define DEBUG false
 
 #include "../tree/tree.hpp"
 #include "../symboltable/symboltabelle.hpp"
 #include <string>
 #include <iostream>
+#include "../ast/ast_builder.hpp"
 
 typedef tree<string> syntaxTree;
 typedef symtab<int> pl0_symtab;
@@ -13,12 +14,13 @@ using namespace std;
 
 int yylex();
 void yyerror(const std::string &s);
-enum{st_const = 1 << 0, st_var = 1 << 1, st_proc = 1 << 2};
 
 // Globals
 syntaxTree * root;
 pl0_symtab st (DEBUG);
 bool semantic_error = false;
+PT2AST pt2ast (true);
+ast ast_root;
 
 // Helper functions
 void insert_sym(string s, int type){
@@ -85,7 +87,7 @@ void reset_parser_state() {
 
 %%
 
-program         : {reset_parser_state();} block t_punkt						{$$ = new syntaxTree("program"); $$->append($2); root = $$; if(semantic_error) YYERROR; if(DEBUG) root->ascii();}
+program         : {reset_parser_state();} block t_punkt						{$$ = new syntaxTree("program"); $$->append($2); root = $$; if(semantic_error) YYERROR; if(DEBUG) root->ascii(); ast_root = pt2ast.convert_syntax_tree(root); ast_root.tikz();}
 ;
 block           : {st.level_up();} constdecl vardecl proclist statement		{$$ = new syntaxTree("block"); $$->append($2); $$->append($3); $$->append($4); $$->append($5);st.level_down();}
 ;
