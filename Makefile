@@ -9,19 +9,31 @@ TREE_DIR := tree
 AST_DIR := ast
 RAM_DIR := ast
 
+# Your codegen folder (AST -> AAssembler asm)
+AASSEMBLER_DIR := ast-2-aassembler
+
+# The provided assembler + VM toolchain folder
+AAREST_DIR := aassembler-aarest
+
 # -----------------------
 # Compiler / Tools
 # -----------------------
 CXX := g++
+CC := gcc
 LEX := flex
 YACC := bison
+
 CXXFLAGS := -std=c++17 -Wall -O2 \
-	-I$(PARSER_DIR) -I$(SCANNER_DIR) -I$(SEMANTIC_DIR) -I$(TREE_DIR) -I$(AST_DIR)
+	-I$(PARSER_DIR) -I$(SCANNER_DIR) -I$(SEMANTIC_DIR) -I$(TREE_DIR) -I$(AST_DIR) -I$(AASSEMBLER_DIR)
+
+CFLAGS := -O2 -Wall -I$(AAREST_DIR)
 
 # -----------------------
 # Files
 # -----------------------
-MAIN_CPP ?= $(PARSER_DIR)/my_pl-0.cpp
+# NEW: parser main in repo root (sets g_out_base)
+MAIN_CPP := main.cpp
+
 TEST_MAIN_CPP := $(PARSER_DIR)/pl-0.cpp
 
 YACC_SRC := $(PARSER_DIR)/pl0.y
@@ -42,6 +54,14 @@ RAM_CPP := $(RAM_DIR)/ram.cpp
 
 # AST builder source
 AST_BUILDER_CPP := $(AST_DIR)/ast_builder.cpp
+
+# AST -> AAssembler codegen source (your project)
+AAS_CPP := $(AASSEMBLER_DIR)/ast-2-aassembler.cpp
+
+# Provided assembler + VM toolchain build outputs
+AASSEMBLER_BIN := $(BUILD_DIR)/aassembler_bin
+AAREST_BIN := $(BUILD_DIR)/aarest-console
+AASSEMBLER_LEX_CPP := $(BUILD_DIR)/aassembler.yy.cpp
 
 # -----------------------
 # Special: generate y.tab.h where scanner expects it
@@ -70,6 +90,7 @@ SEMANTIC_TEST_EXEC := $(BUILD_DIR)/pl0_semantic_test
 AST_OBJ := $(BUILD_DIR)/ast.o
 RAM_OBJ := $(BUILD_DIR)/ram.o
 AST_BUILDER_OBJ := $(BUILD_DIR)/ast_builder.o
+AAS_OBJ := $(BUILD_DIR)/ast-2-aassembler.o
 
 # -----------------------
 # Create build directory
@@ -92,7 +113,7 @@ $(BUILD_DIR)/main_sem.o: $(SEMANTIC_TEST_MAIN) $(PARSER_YTAB_H) | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $(SEMANTIC_TEST_MAIN) -o $(BUILD_DIR)/main_sem.o
 
 # -----------------------
-# Compile AST / RAM / AST builder
+# Compile AST / RAM / AST builder / AAssembler codegen
 # -----------------------
 $(AST_OBJ): $(AST_CPP) | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $(AST_CPP) -o $(AST_OBJ)
@@ -102,6 +123,9 @@ $(RAM_OBJ): $(RAM_CPP) | $(BUILD_DIR)
 
 $(AST_BUILDER_OBJ): $(AST_BUILDER_CPP) | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $(AST_BUILDER_CPP) -o $(AST_BUILDER_OBJ)
+
+$(AAS_OBJ): $(AAS_CPP) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -c $(AAS_CPP) -o $(AAS_OBJ)
 
 # -----------------------
 # Generate parser header where scanner expects it (parser/y.tab.h)
@@ -150,28 +174,41 @@ $(SCANNER_EXEC): $(SCANNER_OBJ) $(BUILD_DIR)/pl0.yy.o $(SCANNER_STUB_OBJ) | $(BU
 # -----------------------
 # Link parser executables
 # -----------------------
-$(PARSER_EXEC): $(PARSER_OBJ) $(AST_OBJ) $(RAM_OBJ) $(AST_BUILDER_OBJ) | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) $(PARSER_OBJ) $(AST_OBJ) $(RAM_OBJ) $(AST_BUILDER_OBJ) -o $(PARSER_EXEC)
+$(PARSER_EXEC): $(PARSER_OBJ) $(AST_OBJ) $(RAM_OBJ) $(AST_BUILDER_OBJ) $(AAS_OBJ) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) $(PARSER_OBJ) $(AST_OBJ) $(RAM_OBJ) $(AST_BUILDER_OBJ) $(AAS_OBJ) -o $(PARSER_EXEC)
 
 $(TEST_PARSER_EXEC): $(TEST_PARSER_OBJ) | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $(TEST_PARSER_OBJ) -o $(TEST_PARSER_EXEC)
 
-$(SEMANTIC_TEST_EXEC): $(SEMANTIC_TEST_OBJ) $(AST_OBJ) $(RAM_OBJ) $(AST_BUILDER_OBJ) | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) $(SEMANTIC_TEST_OBJ) $(AST_OBJ) $(RAM_OBJ) $(AST_BUILDER_OBJ) -o $(SEMANTIC_TEST_EXEC)
+$(SEMANTIC_TEST_EXEC): $(SEMANTIC_TEST_OBJ) $(AST_OBJ) $(RAM_OBJ) $(AST_BUILDER_OBJ) $(AAS_OBJ) | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) $(SEMANTIC_TEST_OBJ) $(AST_OBJ) $(RAM_OBJ) $(AST_BUILDER_OBJ) $(AAS_OBJ) -o $(SEMANTIC_TEST_EXEC)
+
+# -----------------------
+# Build the provided assembler + VM (aassembler + aarest-console)
+# -----------------------
+$(AASSEMBLER_BIN): $(AAREST_DIR)/aassembler.l $(AAREST_DIR)/opcodes.h | $(BUILD_DIR)
+	$(LEX) -o $(AASSEMBLER_LEX_CPP) $(AAREST_DIR)/aassembler.l
+	$(CXX) -std=c++17 -O2 -Wall -I$(AAREST_DIR) $(AASSEMBLER_LEX_CPP) -o $(AASSEMBLER_BIN)
+
+$(AAREST_BIN): $(AAREST_DIR)/aarest-console.c $(AAREST_DIR)/stack.c $(AAREST_DIR)/stack.h $(AAREST_DIR)/opcodes.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(AAREST_DIR)/aarest-console.c $(AAREST_DIR)/stack.c -o $(AAREST_BIN)
 
 # -----------------------
 # Phony targets
 # -----------------------
-.PHONY: build build_parser build_scanner run run_scanner_tests run_scanner_examples run_parser_wo_semantic_tests run_parser_tests clean help
+.PHONY: build build_parser build_scanner build_vm run_parser run_parser_root run_asm run_scanner_tests run_scanner_examples run_parser_wo_semantic_tests run_parser_tests clean help
 
 # -----------------------
 # Build everything
 # -----------------------
 build: $(PARSER_EXEC) $(SCANNER_EXEC)
 	@echo "Build complete!"
-	@echo "Run parser with: 'make run file=FILE'"
+	@echo "Run parser with: 'make run_parser file=FILE'"
+	@echo "Run parser output to repo root: 'make run_parser_root file=FILE'"
 	@echo "Run scanner tests with: 'make run_scanner_tests'"
 	@echo "Run scanner examples with: 'make run_scanner_examples'"
+	@echo "Build VM tools with: 'make build_vm'"
+	@echo "Run asm with: 'make run_asm asm=FILE'"
 
 build_parser: $(PARSER_EXEC)
 	@echo "Parser built: $(PARSER_EXEC)"
@@ -179,14 +216,43 @@ build_parser: $(PARSER_EXEC)
 build_scanner: $(SCANNER_EXEC)
 	@echo "Scanner built: $(SCANNER_EXEC)"
 
+build_vm: $(AASSEMBLER_BIN) $(AAREST_BIN)
+	@echo "VM tools built:"
+	@echo "  $(AASSEMBLER_BIN)"
+	@echo "  $(AAREST_BIN)"
+
 # -----------------------
-# Run parser on a file
+# Run parser on a file (output dir defaults to same dir as input)
+# Usage: make run_parser file=path/to/foo.pl0
 # -----------------------
-run: $(PARSER_EXEC)
+run_parser: $(PARSER_EXEC)
 	@if [ -n "$(file)" ]; then \
-		./$(PARSER_EXEC) $(file); \
+		./$(PARSER_EXEC) "$(file)"; \
 	else \
 		echo "Error: please provide a file with 'file=filename'"; \
+	fi
+
+# -----------------------
+# Run parser on a file but force output asm into repo root
+# Usage: make run_parser_root file=path/to/foo.pl0
+# -----------------------
+run_parser_root: $(PARSER_EXEC)
+	@if [ -n "$(file)" ]; then \
+		./$(PARSER_EXEC) "$(file)" . ; \
+	else \
+		echo "Error: please provide a file with 'file=filename'"; \
+	fi
+
+# -----------------------
+# Assemble + run an asm program
+# Usage: make run_asm asm=path/to/program.asm
+# -----------------------
+run_asm: $(AASSEMBLER_BIN) $(AAREST_BIN)
+	@if [ -n "$(asm)" ]; then \
+		base="$${asm%.asm}"; \
+		./$(AASSEMBLER_BIN) "$$base" && ./$(AAREST_BIN) "$$base"; \
+	else \
+		echo "Error: please provide asm=FILE (e.g. make run_asm asm=out/test.asm)"; \
 	fi
 
 # -----------------------
@@ -234,13 +300,13 @@ help:
 	@echo "  make build                        - Build parser + scanner"
 	@echo "  make build_parser                 - Build parser only"
 	@echo "  make build_scanner                - Build scanner only"
-	@echo "  make run file=FILE                - Run parser on FILE"
+	@echo "  make build_vm                     - Build provided assembler + VM tools"
+	@echo "  make run_parser file=FILE         - Run parser on FILE (asm next to input)"
+	@echo "  make run_parser_root file=FILE    - Run parser on FILE (asm into repo root)"
+	@echo "  make run_asm asm=FILE             - Assemble + run an asm file via VM"
 	@echo "  make run_parser_wo_semantic_tests - Run parser tests without semantic checks"
 	@echo "  make run_parser_tests             - Run parser tests with semantic checks"
 	@echo "  make run_scanner_tests            - Run scanner test suite"
 	@echo "  make run_scanner_examples         - Run scanner on all examples and count errors"
 	@echo "  make clean                        - Remove all build artifacts"
 	@echo "  make help                         - Show this help"
-	@echo ""
-	@echo "To use a different main file for testing, call:"
-	@echo "  make MAIN_CPP=parser/my_pl-0.cpp build run file=FILE"
