@@ -30,7 +30,7 @@ std::ostream& operator<<(std::ostream& os, const SymEntry& e) {
 PT2AST::PT2AST(int debug_) : st(debug_), debug(debug_) {}
 
 // ============================================================================
-// Top-level entry
+// Main
 // ============================================================================
 
 ast PT2AST::convert_syntax_tree(syntaxTree* root) {
@@ -75,7 +75,7 @@ std::string PT2AST::to_ident(syntaxTree* n) {
 }
 
 // ============================================================================
-// Pre-pass: count vars for proc header
+// Pre-Pass: count variables for procedure
 // ============================================================================
 
 int PT2AST::peek_block_n_var(syntaxTree* block) {
@@ -100,7 +100,7 @@ int PT2AST::peek_block_n_var(syntaxTree* block) {
 }
 
 // ============================================================================
-// Symbol table inserts
+// Symbol table inserts (no checks as this is done during parsing)
 // ============================================================================
 
 void PT2AST::insert_const(const std::string& name, int value) {
@@ -125,7 +125,7 @@ void PT2AST::insert_proc(const std::string& name, int proc_nr) {
 }
 
 // ============================================================================
-// Decl conversion
+// Declaration conversion
 // ============================================================================
 
 void PT2AST::convert_constdecl(syntaxTree* cd) {
@@ -178,7 +178,7 @@ int PT2AST::convert_vardecl(syntaxTree* vd) {
 }
 
 // ============================================================================
-// Statement conversion (dispatcher + actual statements)
+// Statemnt conversion
 // ============================================================================
 
 void PT2AST::convert_stmt_node(syntaxTree* node, ast& A) {

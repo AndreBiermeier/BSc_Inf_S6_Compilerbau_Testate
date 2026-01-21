@@ -10,14 +10,14 @@
 
 using syntaxTree = tree<std::string>;
 
-// Same bitmask style as in your parser
+// Same as in the parser (from lecture)
 enum { st_const = 1 << 0, st_var = 1 << 1, st_proc = 1 << 2 };
 
 struct SymEntry {
-    int kind = 0;         // st_const / st_var / st_proc (bitmask)
-    int value = 0;        // only meaningful for st_const
-    int offset = 0;       // only meaningful for st_var  (sto)
-    int proc_nr = -1;     // only meaningful for st_proc (procedure id)
+    int kind = 0;         // st_const / st_var / st_proc
+    int value = 0;        // for st_const
+    int offset = 0;       // for st_var  (sto)
+    int proc_nr = -1;     // for st_proc (procedure id)
 };
 
 std::ostream& operator<<(std::ostream& os, const SymEntry& e);
@@ -32,9 +32,9 @@ public:
 private:
     PL0Symtab st;
     int debug;
-    int next_proc_nr = 0; // global numbering across whole program
+    int next_proc_nr = 0;                                                                                               // procedure numbering for the entire program
 
-    // ---------- helpers using your tree API ----------
+    // ---------- Helpers ----------
     static inline const std::string& L(syntaxTree* n) { return n->get(); }
     static inline syntaxTree* C(syntaxTree* n, int i) { return n->childs(i); }
 
@@ -43,10 +43,10 @@ private:
     static int to_int(syntaxTree* n);
     static std::string to_ident(syntaxTree* n);
 
-    // ---------- pre-pass ----------
+    // ---------- Pre-Pass to determine number of variables ----------
     int peek_block_n_var(syntaxTree* block);
 
-    // ---------- decl conversion ----------
+    // ---------- Declaration Conversions ----------
     void insert_const(const std::string& name, int value);
     void insert_var(const std::string& name, int offset);
     void insert_proc(const std::string& name, int proc_nr);
@@ -54,7 +54,7 @@ private:
     void convert_constdecl(syntaxTree* cd);
     int  convert_vardecl(syntaxTree* vd);
 
-    // ---------- statements / expressions ----------
+    // ---------- Statements / Expressions ----------
     void convert_stmt_node(syntaxTree* node, ast& A);
     void convert_statement(syntaxTree* stmt, ast& A);
 
@@ -65,7 +65,7 @@ private:
     ast_optree* convert_condition(syntaxTree* cond);
     ast_optree* convert_compare_op(syntaxTree* compareNode, ast_optree* lhs, ast_optree* rhs);
 
-    // ---------- procedures ----------
+    // ---------- Procedures ----------
     struct ProcInfo {
         std::string name;
         syntaxTree* block = nullptr;
