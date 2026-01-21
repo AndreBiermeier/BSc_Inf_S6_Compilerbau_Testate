@@ -1,5 +1,6 @@
 %{
 #include <string>
+#include "../tree/tree.hpp"
 #include <iostream>
 
 int yylex();
@@ -7,9 +8,24 @@ int yyerror(const std::string &s);
 extern int yacc_error;
 
 %}
-%defines "y.tab.h"
+%defines "y.tab.h" // Tells Bison to generate the header file with the tokens for the scanner.
 
-%token t_punkt t_const t_eq t_komma t_semik t_var t_proc t_assign t_call t_begin t_end t_read t_write t_if t_then t_while t_do t_odd t_ne t_lt t_le t_gt t_ge t_plus t_minus t_mult t_div t_bra_o t_bra_c t_ident t_number t_error
+%union {
+    tree<string> * tree_node;
+    char* txt;
+}
+
+%token t_punkt t_const t_eq t_komma t_semik t_var t_proc t_assign t_call t_begin t_end
+%token t_read t_write t_if t_then t_while t_do t_odd
+%token t_ne t_lt t_le t_gt t_ge
+%token t_plus t_minus t_mult t_div
+%token t_bra_o t_bra_c
+%token <txt> t_ident
+%token <txt> t_number
+%token t_error
+
+%type <tree_node> program block constdecl constlist vardecl varlist proclist statement
+%type <tree_node> statementlist condition compare expression term termlist factor factorlist
 
 %left t_plus t_minus
 %left t_mult t_div
