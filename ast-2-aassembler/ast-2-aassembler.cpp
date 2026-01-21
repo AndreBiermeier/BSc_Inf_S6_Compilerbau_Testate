@@ -8,10 +8,13 @@
 
 using namespace std;
 
-static ofstream myfile;
+static ofstream myfile;                                                                                                 // Where .asm is written to
 static string label = "";
 
-// --- emitter (matches sample style) ---
+// ============================================================================
+// Emitters
+// ============================================================================
+
 static void emit(const string& lab, const string& cmd,
                  const string& arg, const string& comment)
 {
@@ -54,7 +57,7 @@ static string FKT(int nr) {
     return "FKT_" + to_string(nr);
 }
 
-// --- address helper: pushes address of var onto stack ---
+// Helper to push variable address onto the stack
 static void adr_var(int stl, int sto, const string& name) {
     emit("loadr", 0, "adr " + name + " (" + to_string(stl) + "/" + to_string(sto) + ")");
     for (int i = 0; i < stl; i++)
@@ -62,7 +65,9 @@ static void adr_var(int stl, int sto, const string& name) {
     emit("dec", (long long)(sto + 2), "p - 2 - offset");
 }
 
-// --- expression codegen ---
+// ============================================================================
+// Expression code generation
+// ============================================================================
 static void gen_expr(ast_optree* e);
 
 static void gen_expr(ast_optree* e)
@@ -76,7 +81,7 @@ static void gen_expr(ast_optree* e)
         case op_var: {
             auto* v = (ast_optree_var*)e;
             adr_var(v->stl, v->sto, v->name);
-            emit("loads");             // load value at address
+            emit("loads");                                                                                      // load value at address
         } break;
 
         case op_chs:
@@ -94,7 +99,6 @@ static void gen_expr(ast_optree* e)
             gen_expr(e->l); gen_expr(e->r); emit("div"); break;
         case op_mod:
             gen_expr(e->l); gen_expr(e->r); emit("mod"); break;
-
         case op_eq:
             gen_expr(e->l); gen_expr(e->r); emit("cmpeq"); break;
         case op_ne:
@@ -114,14 +118,15 @@ static void gen_expr(ast_optree* e)
             emit("loadc", 0, "!= 0");
             emit("cmpne");
             break;
-
         default:
             cerr << "gen_expr: unknown optree type " << e->type << "\n";
             break;
     }
 }
 
-// --- collect jump targets inside one proc ---
+// ============================================================================
+// Collects the jump targets of a procedure
+// ============================================================================
 static unordered_set<ast_element*> collect_targets(ast_proc& p)
 {
     unordered_set<ast_element*> t;
@@ -134,10 +139,12 @@ static unordered_set<ast_element*> collect_targets(ast_proc& p)
     return t;
 }
 
-// --- statement codegen ---
+// ============================================================================
+// Statement code generation
+// ============================================================================
 static void gen_stmt(ast_element* it, const unordered_set<ast_element*>& targets)
 {
-    if (targets.find(it) != targets.end())
+    if (targets.find(it) != targets.end())                                                                              // Give it a label if theres a jump to the AST node
         set_label(L(it));
 
     switch (it->get_type()) {
@@ -160,8 +167,8 @@ static void gen_stmt(ast_element* it, const unordered_set<ast_element*>& targets
 
         case stmt_assign: {
             auto* a = (ast_element_assign*)it;
-            gen_expr(a->get_expr());           // push RHS value
-            adr_var(a->stl, a->sto, a->name);  // push LHS address
+            gen_expr(a->get_expr());                                                                                 // push RHS value
+            adr_var(a->stl, a->sto, a->name);                                                                           // push LHS address
             emit("stores", "", "assign");
         } break;
 
@@ -196,7 +203,9 @@ static void gen_stmt(ast_element* it, const unordered_set<ast_element*>& targets
     }
 }
 
-// --- runtime helpers (copy exactly from your sample) ---
+// ============================================================================
+// RAM Helpers
+// ============================================================================
 static void emit_ram_helpers()
 {
     emit("RAM_UP", "loadr", 0, "");
@@ -219,34 +228,37 @@ static void emit_ram_helpers()
     emit("return", "", "");
 }
 
-// --- main entry ---
-int ast_2_aassembler(ast& A, string filename)
+// ============================================================================
+// Main
+// ============================================================================
+int ast_2_aassembler(ast& AST, string filename)
 {
     filename += ".asm";
-    cerr << "create " << filename << "\n";
+    cerr << "Created " << filename << "\n";
     myfile.open(filename);
     if (!myfile.is_open()) {
         cerr << "error opening " << filename << " for writing\n";
         return -1;
     }
 
-    // init + jump to main (your sample)
+    // Initialization
     emit("loadc", 0, "RAM-INIT");
     emit("storer", 0, "TOS setzen");
     emit("loadc", 0, "Pseudo-SL fuer main");
     emit("jump", FKT(0), "==> Startfunktion");
 
+    // RAM Helpers
     emit_ram_helpers();
 
-    // emit procedures
-    for (int nr = 0; nr < (int)A.v.size(); nr++) {
-        ast_proc& p = A.v[nr];
+    // Emit for all procedures
+    for (int nr = 0; nr < (int)AST.v.size(); nr++) {
+        ast_proc& p = AST.v[nr];
 
         set_label(FKT(nr));
-        emit("loadc", (long long)p.get_n_var(), "nvar");
-        emit("call", "RAM_UP", "stackframe anlegen");
+        emit("loadc", (long long)p.get_n_var(), "nvar");                                             // Number of local variables
+        emit("call", "RAM_UP", "stackframe anlegen");                                         // Procedure's stackframe
 
-        auto targets = collect_targets(p);
+        auto targets = collect_targets(p);                                                   // Get all jump targets of the procedure's statements
 
         for (ast_element* it = p.get_start(); it; it = it->get_next()) {
             if (it->get_type() == stmt_end) break;
