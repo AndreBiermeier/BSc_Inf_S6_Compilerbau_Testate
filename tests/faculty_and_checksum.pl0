@@ -1,4 +1,4 @@
-(* Eingabe 5 -> 145=120 + 25 = 5! + 1+3+5+7+9)
+(* Eingabe 5 -> 145=120 + 25 = 5! + 1+3+5+7+9 *)
 VAR n, fact, checksum;
 
 PROCEDURE Outer;
