@@ -39,22 +39,22 @@ FKT_1	loadc	1	# nvar
 	loadr	0	# adr i (0/0)
 	dec	2	# p - 2 - offset
 	stores	# assign
-L_102347173532416	nop
+L_104179147789056	nop
 	loadr	0	# adr i (0/0)
 	dec	2	# p - 2 - offset
 	loads
 	loadc	7	# const
 	cmple
-	jumpz	L_102347173533360	# if 0 -> jump
+	jumpz	L_104179147790000	# if 0 -> jump
 	loadr	0	# adr i (0/0)
 	dec	2	# p - 2 - offset
 	loads
 	loadc	3	# const
 	cmpge
-	jumpz	L_102347173532992	# if 0 -> jump
+	jumpz	L_104179147789632	# if 0 -> jump
 	loadr	0	# new SL for IncBy
 	call	FKT_2	# call IncBy
-L_102347173532992	nop
+L_104179147789632	nop
 	loadr	0	# adr i (0/0)
 	dec	2	# p - 2 - offset
 	loads
@@ -63,8 +63,8 @@ L_102347173532992	nop
 	loadr	0	# adr i (0/0)
 	dec	2	# p - 2 - offset
 	stores	# assign
-	jump	L_102347173532416	# goto
-L_102347173533360	nop
+	jump	L_104179147789056	# goto
+L_104179147790000	nop
 	call	RAM_DOWN	# stackframe loeschen
 	return
 FKT_2	loadc	1	# nvar

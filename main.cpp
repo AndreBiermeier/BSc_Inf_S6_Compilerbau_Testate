@@ -73,6 +73,6 @@ int main(int argc, char **argv)
         return result;
     }
 
-    std::cout << "Generated: " << g_out_base << ".asm\n";
+    std::cerr << "Generated: " << g_out_base << ".asm\n";
     return 0;
 }
