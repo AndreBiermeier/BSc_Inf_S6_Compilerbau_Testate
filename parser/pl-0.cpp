@@ -32,7 +32,7 @@ extern void yyrestart(FILE*);  // reset scanner buffer
 // Main function: run tests
 // -----------------------
 int main(int argc, char * argv[]) {
-    FILE *out = fopen("results.txt", "a");
+    FILE *out = fopen("cmake-build-debug/results.txt", "a");
     if (!out) { cerr << "Cannot open results.txt\n"; return 1; }
 
     int rc = 0, n = 0, ok = 0;
