@@ -6,13 +6,13 @@
 /*
  * This main.cpp accepts two arguments.
  * 1. arg: The input pl0 program (e.g. "program.pl0")
- * 2. arg: The output directory (e.g.
+ * 2. arg: The output directory (e.g. "../output/")
  */
 
 extern int yyparse();
 extern FILE* yyin;
 
-// defined in the parser (.y file)
+// Global variable to set the output location.
 extern std::string g_out_base;
 
 void yyerror(const std::string &s) {
@@ -33,7 +33,6 @@ int main(int argc, char **argv)
     // Input file
     // -----------------------
     fs::path input_path(argv[1]);
-
     yyin = fopen(input_path.c_str(), "r");
     if (!yyin) {
         std::cerr << "Cannot open file: " << input_path << std::endl;
@@ -50,20 +49,20 @@ int main(int argc, char **argv)
         out_dir = input_path.parent_path();
     }
 
+    // Just in case
     if (out_dir.empty())
         out_dir = ".";
 
     fs::create_directories(out_dir);
 
     // -----------------------
-    // Set global output base
-    // (WITHOUT ".asm")
+    // Set global output base (without .asm)
     // -----------------------
     fs::path out_base = out_dir / input_path.stem();
     g_out_base = out_base.string();
 
     // -----------------------
-    // Run parser (grammar action does codegen)
+    // Run parser (AST to ASM code generation is done in the grammar action)
     // -----------------------
     int result = yyparse();
     fclose(yyin);
