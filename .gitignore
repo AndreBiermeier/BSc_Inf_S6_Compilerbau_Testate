@@ -20,6 +20,10 @@ scanner/examples/output
 *.json
 !devcontainer/devcontainer.json
 !ast-2-aassembler/tests/expected/*.json
+!tests/expected/*.json
+!tests/output/*.json
+!tests/expected/*.bin
+!tests/output/*.bin
 
 # Flex/Bison generated files anywhere
 **/lex.yy.c
