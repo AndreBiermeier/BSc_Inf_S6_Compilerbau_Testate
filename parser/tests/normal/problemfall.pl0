@@ -1,0 +1,5 @@
+var a;
+begin
+    a := 1;
+    ! -2*a
+end .
