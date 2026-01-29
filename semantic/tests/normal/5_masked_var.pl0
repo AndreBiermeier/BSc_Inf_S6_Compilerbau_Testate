@@ -1,0 +1,12 @@
+var a;
+procedure f;
+    var a;
+    begin
+        a := a + 5;
+    end
+;
+begin
+    a := 1;
+    call f;
+    ! a; (*should output 1*)
+end.

@@ -1,0 +1,29 @@
+const x=1;
+var a, b, c;
+procedure h;
+    const hx=1;
+    var ha;
+;
+procedure f;
+    const fx=1;
+    var fa, a;
+    procedure g;
+        const gx=1;
+        var ga;
+        begin
+            call f;
+            call h;
+            ! fx;
+            ! fa;
+            ! a;
+            ! gx;
+            ! ga
+        end
+    ;
+;
+begin
+    call f;
+    ! a;
+    ! x;
+    ! gx;
+end.

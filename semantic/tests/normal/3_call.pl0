@@ -1,0 +1,6 @@
+const x=1;
+var a, b, c;
+procedure f;;
+begin
+    call f;
+end.

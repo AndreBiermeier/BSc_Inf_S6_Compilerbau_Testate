@@ -1,0 +1,7 @@
+const x=1;
+var a, b, c;
+
+begin
+    ! x;
+    ! d;
+end.

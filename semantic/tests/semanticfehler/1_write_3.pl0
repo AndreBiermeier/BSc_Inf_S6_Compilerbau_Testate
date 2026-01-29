@@ -1,0 +1,11 @@
+const x=1;
+var a, b, c;
+procedure f;
+BEGIN
+    a := a + 1
+END;
+begin
+    ! x;
+    ! a;
+    ! f;
+end.
