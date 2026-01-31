@@ -6,7 +6,6 @@ CXXFLAGS = -std=c++17 -O2
 PARSER_Y   = pl0.y
 SCANNER_L  = pl0-scanner.l
 MAIN_CPP   = pl0-studi.cpp
-AST_BUILDER_CPP = ast_builder.cpp
 
 PARSER_C = y.tab.c
 PARSER_H = y.tab.h
@@ -26,7 +25,7 @@ $(SCANNER_C): $(SCANNER_L) $(PARSER_H)
 
 # Build executable
 $(BIN): $(PARSER_C) $(SCANNER_C) $(MAIN_CPP) $(AST_BUILDER_CPP)
-	$(CXX) $(CXXFLAGS) $(MAIN_CPP) $(AST_BUILDER_CPP) -o $(BIN)
+	$(CXX) $(CXXFLAGS) $(MAIN_CPP) -o $(BIN)
 
 # Clean
 clean:
