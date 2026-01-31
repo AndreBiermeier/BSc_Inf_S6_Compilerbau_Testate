@@ -1,5 +1,5 @@
-(* Ergebnis -> 25 = 3+4+5+6+7 *)
-(* Innere funktion erhöht globales x um i und wird nur für i>=3 aufgerufen *)
+(* Result -> 25 = 3+4+5+6+7 *)
+(* Inner function increments global x by i and is only called for i>=3 *)
 VAR x;
 
 PROCEDURE Outer;
