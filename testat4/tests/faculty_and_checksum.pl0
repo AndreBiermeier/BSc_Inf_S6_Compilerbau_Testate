@@ -1,0 +1,38 @@
+(* Input 5 -> 145=120 + 25 = 5! + 1+3+5+7+9 *)
+VAR n, fact, checksum;
+
+PROCEDURE Outer;
+VAR tmp;
+
+  PROCEDURE Fak;
+  BEGIN
+    IF n > 1 THEN
+    BEGIN
+      fact := fact * n;
+      n := n - 1;
+      CALL Fak
+    END
+  END;
+
+  PROCEDURE LoopChecksum;
+  BEGIN
+    tmp := 1;
+    checksum := 0;
+    WHILE tmp <= 10 DO
+    BEGIN
+      IF ODD tmp THEN checksum := checksum + tmp;
+      tmp := tmp + 1
+    END
+  END;
+
+BEGIN
+  fact := 1;
+  CALL Fak;          (* uses global n, fact *)
+  CALL LoopChecksum  (* sets checksum *)
+END;
+
+BEGIN
+  n := 5;
+  CALL Outer;
+  ! fact + checksum
+END.

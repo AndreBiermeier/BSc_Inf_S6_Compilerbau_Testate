@@ -1,0 +1,16 @@
+(* Rekursive Berechnung der Fakultät *)
+var n, f;
+procedure fak;
+	if n > 0 then
+	begin
+		f := f * n;
+		n := n - 1;
+		call fak;
+		n := n + 1;
+	end;
+begin
+	n := 5;
+	f := 1;
+	call fak;
+	! f;
+end.
