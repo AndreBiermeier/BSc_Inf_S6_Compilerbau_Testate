@@ -2,7 +2,6 @@
 
 #include <stdexcept>
 #include <iostream>   // cerr
-#include <utility>    // (optional)
 
 std::ostream& operator<<(std::ostream& os, const SymEntry& e) {
     os << "{";
