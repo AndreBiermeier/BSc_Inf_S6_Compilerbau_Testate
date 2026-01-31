@@ -14,6 +14,8 @@ cmake-build-release/
 *.so
 scanner/test-cases/output
 scanner/examples/output
+pl0_parser
+pl0_interpreter
 
 # Binary outputs
 *.bin
