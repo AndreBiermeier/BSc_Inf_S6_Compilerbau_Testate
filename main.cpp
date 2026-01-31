@@ -15,10 +15,6 @@ extern FILE* yyin;
 // Global variable to set the output location.
 extern std::string g_out_base;
 
-void yyerror(const std::string &s) {
-    std::cerr << "Error: " << s << std::endl;
-}
-
 int main(int argc, char **argv)
 {
     if (argc < 2) {

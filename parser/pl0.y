@@ -21,7 +21,9 @@ using namespace std;
 
 
 int yylex();
-void yyerror(const std::string &s);
+void yyerror(const std::string &s) {
+    std::cerr << "Error: " << s << std::endl;
+}
 
 // Globals
 string g_out_base = "program";

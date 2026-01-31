@@ -4,9 +4,6 @@
 
 extern int yyparse();
 extern FILE* yyin;
-void yyerror(const std::string &s) {
-    std::cerr << "Error: " << s << std::endl;
-}
 
 int main(int argc, char **argv) {
     if (argc > 1) {

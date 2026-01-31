@@ -11,16 +11,8 @@ using namespace std;
 // -----------------------
 int yylex();
 int yyparse();
-int yyerror(const string &t);
 
 int yacc_error = 0;
-
-int yyerror(const char* t) { return yyerror(string(t)); }
-int yyerror(const string &t) {
-    yacc_error = 1;
-    //cout << t << endl;
-    return 0;
-}
 
 // -----------------------
 // Use Bison/Flex headers

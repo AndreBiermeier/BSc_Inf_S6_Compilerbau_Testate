@@ -4,7 +4,9 @@
 #include <iostream>
 
 int yylex();
-int yyerror(const std::string &s);
+void yyerror(const std::string &s) {
+    std::cerr << "Error: " << s << std::endl;
+}
 extern int yacc_error;
 
 %}
