@@ -12,7 +12,7 @@ PARSER_C = y.tab.c
 PARSER_H = y.tab.h
 SCANNER_C = lex.yy.c
 
-BIN = pl0_parser
+BIN = pl0_interpreter
 
 all: $(BIN)
 
